@@ -1,0 +1,75 @@
+<resources>
+
+        <string name="app_name">NAEP</string>
+        <string name="app_full_name">Native Art Exhibition Platform</string>
+
+        <!-- Roles and auth -->
+        <string name="role_guest">Guest</string>
+        <string name="role_enthusiast">Art Enthusiast</string>
+        <string name="role_artisan">Artisan</string>
+        <string name="role_prompt_title">How would you like to use NAEP?</string>
+        <string name="role_prompt_note">You can switch between Art Enthusiast and Artisan at any time.</string>
+        <string name="role_enthusiast_desc">Discover, like and inquire about creations.</string>
+        <string name="role_artisan_desc">Open a gallery and showcase your creations.</string>
+        <string name="sign_in">Sign in</string>
+        <string name="register">Register</string>
+        <string name="sign_out">Sign out</string>
+        <string name="continue_as_guest">Continue as Guest</string>
+        <string name="full_name">Full name</string>
+        <string name="phone_number">Phone number</string>
+        <string name="email_address">Email address</string>
+        <string name="password">Password</string>
+        <string name="phone_or_email">Phone number or email</string>
+        <string name="profile_picture_optional">Profile picture (optional)</string>
+        <string name="guest_banner">You are browsing as a Guest</string>
+        <string name="sign_in_to_continue">Sign in to continue</string>
+        <string name="sign_in_to_contact">Sign in to contact</string>
+        <string name="guest_prompt_like">Sign in or register to like this creation.</string>
+        <string name="guest_prompt_inquire">Sign in or register to inquire about this creation.</string>
+
+        <!-- Marketplace and creations -->
+        <string name="marketplace">Marketplace</string>
+        <string name="most_liked">Most Liked Creations</string>
+        <string name="most_viewed">Most Viewed Creations</string>
+        <string name="all_categories">All</string>
+        <string name="readily_available">Readily Available</string>
+        <string name="unavailable">Unavailable</string>
+        <string name="price_on_request">Price on request</string>
+        <string name="inquire_creation">Inquire Creation</string>
+        <string name="dimensions">Dimensions</string>
+        <string name="category">Category</string>
+        <string name="description">Description / Story behind the piece</string>
+        <string name="likes">Likes</string>
+        <string name="views">Views</string>
+        <string name="add_creation">Add Creation</string>
+        <string name="edit_creation">Edit Creation</string>
+        <string name="title">Title</string>
+        <string name="price_mwk">Price (MWK)</string>
+        <string name="inventory_count">Inventory count</string>
+        <string name="availability_status">Availability status</string>
+        <string name="add_photos">Add photos</string>
+
+        <!-- Artisan -->
+        <string name="artisan_profile">Artisan Profile</string>
+        <string name="gallery">Gallery</string>
+        <string name="my_gallery">My Gallery</string>
+        <string name="view_full_gallery">View full gallery</string>
+        <string name="recent_creations">Recent creations</string>
+        <string name="open_a_gallery">Open a gallery</string>
+        <string name="bio">Bio (your creative journey)</string>
+        <string name="location">Location</string>
+        <string name="primary_art_category">Primary art category</string>
+        <string name="whatsapp_number">WhatsApp number</string>
+        <string name="contact_on_whatsapp">Contact on WhatsApp</string>
+
+        <!-- Generic -->
+        <string name="profile">Profile</string>
+        <string name="yes">Yes</string>
+        <string name="cancel">Cancel</string>
+        <string name="save">Save</string>
+        <string name="retry">Retry</string>
+        <string name="delete">Delete</string>
+        <string name="nothing_here_yet">Nothing here yet</string>
+        <string name="something_went_wrong">Something went wrong</string>
+
+</resources>
