@@ -1,5 +1,6 @@
 package com.example.naepapp.ui.theme
 
+import com.example.naepapp.ui.theme.NaepTypography
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -11,48 +12,23 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val NaepColorScheme = lightColorScheme(
+    primary = BrightSnow,        onPrimary = Onyx,
+    secondary = BlackForest,     onSecondary = BrightSnow,
+    error = OxBlood,             onError = BrightSnow,
+    background = BrightSnow,     onBackground = Onyx,
+    surface = BrightSnow,        onSurface = Onyx,
+    surfaceVariant = DustGrey.copy(alpha = 0.35f),
+    onSurfaceVariant = Onyx.copy(alpha = 0.7f),
+    outline = DustGrey, outlineVariant = DustGrey,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
 
 @Composable
-fun NAEPAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun NaepTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = NaepColorScheme,
+        typography = NaepTypography,
         content = content
     )
 }
