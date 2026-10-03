@@ -25,7 +25,7 @@ private val NaepColorScheme = lightColorScheme(
 
 
 @Composable
-fun NaepTheme(content: @Composable () -> Unit) {
+fun NAEPAppTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = NaepColorScheme,
         typography = NaepTypography,

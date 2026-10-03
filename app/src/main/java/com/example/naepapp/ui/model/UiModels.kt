@@ -1,6 +1,6 @@
 package com.example.naepapp.ui.model
 
-enum class FeedSort { likes, Views }
+enum class FeedSort { Likes, Views }
 
 data class CategoryUi(
     val id: Int,

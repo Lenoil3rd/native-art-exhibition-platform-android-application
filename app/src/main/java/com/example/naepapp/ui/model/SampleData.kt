@@ -1,6 +1,5 @@
 package com.example.naepapp.ui.model
 
-import com.example.naepapp.ui.model.CategoryUi
 
 // ui/model/SampleData.kt  — MODEL: fake data so every screen has something to show
 object SampleData {
