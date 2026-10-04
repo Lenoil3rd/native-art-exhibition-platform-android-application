@@ -20,7 +20,7 @@
         <string name="email_address">Email address</string>
         <string name="password">Password</string>
         <string name="phone_or_email">Phone number or email</string>
-        <string name="profile_picture_optional">Profile picture (optional)</string>
+        <string name="profile_picture_optional">Profile picture</string>
         <string name="guest_banner">You are browsing as a Guest</string>
         <string name="sign_in_to_continue">Sign in to continue</string>
         <string name="sign_in_to_contact">Sign in to contact</string>
@@ -29,10 +29,10 @@
 
         <!-- Marketplace and creations -->
         <string name="marketplace">Marketplace</string>
-        <string name="most_liked">Most Liked Creations</string>
-        <string name="most_viewed">Most Viewed Creations</string>
+        <string name="most_liked">Most Liked</string>
+        <string name="most_viewed">Most Viewed</string>
         <string name="all_categories">All</string>
-        <string name="readily_available">Readily Available</string>
+        <string name="readily_available">Available</string>
         <string name="unavailable">Unavailable</string>
         <string name="price_on_request">Price on request</string>
         <string name="inquire_creation">Inquire Creation</string>

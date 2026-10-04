@@ -32,9 +32,9 @@ fun NaepButton(
     val container = when (kind) {
         NaepButtonKind.Confirm -> BlackForest        // yes / confirm
         NaepButtonKind.Destructive -> OxBlood        // cancel / terminate / delete
-        NaepButtonKind.Neutral -> BrightSnow
+        NaepButtonKind.Neutral -> Onyx
     }
-    val content = if (kind == NaepButtonKind.Neutral) Onyx else BrightSnow
+    val content = if (kind == NaepButtonKind.Neutral) BrightSnow else BrightSnow
     Button(
         onClick = onClick, enabled = enabled && !loading,
         modifier = modifier.heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),

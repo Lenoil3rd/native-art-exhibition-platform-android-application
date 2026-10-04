@@ -28,7 +28,7 @@ fun NaepFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
         selected = selected, onClick = onClick, label = { Text(label) },
         colors = FilterChipDefaults.filterChipColors(
             containerColor = BrightSnow, labelColor = Onyx,
-            selectedContainerColor = BlackForest, selectedLabelColor = BrightSnow),
+            selectedContainerColor = Onyx, selectedLabelColor = BrightSnow),
         border = FilterChipDefaults.filterChipBorder(enabled = true, selected = selected,
             borderColor = DustGrey, selectedBorderColor = BlackForest),
     )

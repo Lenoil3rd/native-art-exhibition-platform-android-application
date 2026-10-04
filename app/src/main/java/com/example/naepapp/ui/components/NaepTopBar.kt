@@ -24,11 +24,11 @@ fun NaepTopBar(title: String, onBack: (() -> Unit)? = null) {
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         navigationIcon = { if (onBack != null) IconButton(onBack) { Icon(painterResource(R.drawable.ic_arrow_back), "Back") } },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BrightSnow,
-            scrolledContainerColor = BrightSnow,
+            containerColor = Onyx,
+            scrolledContainerColor = Onyx,
             navigationIconContentColor = BrightSnow,
-            titleContentColor = Onyx,
-            actionIconContentColor = Onyx,
+            titleContentColor = BrightSnow,
+            actionIconContentColor = BrightSnow,
         ),
     )
 }
