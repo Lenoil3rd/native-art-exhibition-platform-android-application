@@ -13,6 +13,7 @@ import com.example.naepapp.R
 import com.example.naepapp.ui.components.NaepButton
 import com.example.naepapp.ui.components.NaepButtonKind
 import com.example.naepapp.ui.components.NaepTextField
+import com.example.naepapp.ui.model.DemoConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,7 +35,7 @@ fun LoginScreen(onSignIn: (identifier: String) -> Unit, onRegister: () -> Unit, 
         NaepButton(stringResource(R.string.sign_in),
             onClick = { scope.launch { loading = true; delay(600); loading = false; onSignIn(identifier) } },   // delay = fake request
             modifier = Modifier.fillMaxWidth(), kind = NaepButtonKind.Confirm, loading = loading,
-            enabled = identifier.isNotBlank() && password.isNotBlank())
+            enabled = DemoConfig.SKIP_AUTH_VALIDATION || (identifier.isNotBlank() && password.isNotBlank()))
         Spacer(Modifier.height(8.dp))
         NaepButton(stringResource(R.string.register), onRegister, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))

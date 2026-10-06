@@ -85,9 +85,18 @@ fun NaepNavHost() {
                 composable<LoginRoute> { entry ->
                     val back = entry.toRoute<LoginRoute>().returnToPrevious
                     LoginScreen(
-                        onSignIn = {
-                            user = SampleData.enthusiast            // UI-only: pretend login worked
-                            nav.navigate(RoleSelectionRoute(back)) { popUpTo<LoginRoute> { inclusive = true } }
+                        onSignIn = { identifier ->
+                            val loggedInUser = SampleData.signInUser(identifier)
+                            user = loggedInUser
+                            if (loggedInUser.onboardingDone) {
+                                if (back) {
+                                    nav.popBackStack()
+                                } else {
+                                    nav.navigate(MarketplaceRoute) { popUpTo(0) }
+                                }
+                            } else {
+                                nav.navigate(RoleSelectionRoute(back)) { popUpTo<LoginRoute> { inclusive = true } }
+                            }
                         },
                         onRegister = { nav.navigate(RegisterRoute(back)) },
                         onGuest = { nav.navigate(MarketplaceRoute) { popUpTo(0) } })

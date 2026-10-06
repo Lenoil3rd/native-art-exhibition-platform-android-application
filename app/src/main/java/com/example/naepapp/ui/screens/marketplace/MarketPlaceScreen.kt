@@ -10,11 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.naepapp.R
-import com.example.naepapp.ui.components.CategoryTabs
 import com.example.naepapp.ui.components.CreationCard
 import com.example.naepapp.ui.components.EmptyView
+import com.example.naepapp.ui.components.MarketplaceFilterRow
 import com.example.naepapp.ui.components.NaepTopBar
-import com.example.naepapp.ui.components.SortTabs
 import com.example.naepapp.ui.model.FeedSort
 import com.example.naepapp.ui.model.SampleData
 
@@ -31,9 +30,14 @@ fun MarketplaceScreen(onOpenCreation: (String) -> Unit) {
 
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.marketplace)) }) { pad ->
         Column(Modifier.padding(pad)) {
-            SortTabs(sort) { sort = it }
             Spacer(Modifier.height(8.dp))
-            CategoryTabs(SampleData.categories, categoryId) { categoryId = it }
+            MarketplaceFilterRow(
+                sort = sort,
+                onSortSelected = { sort = it },
+                categories = SampleData.categories,
+                selectedCategoryId = categoryId,
+                onCategorySelected = { categoryId = it }
+            )
             Spacer(Modifier.height(8.dp))
             if (items.isEmpty()) EmptyView()
             else LazyVerticalGrid(

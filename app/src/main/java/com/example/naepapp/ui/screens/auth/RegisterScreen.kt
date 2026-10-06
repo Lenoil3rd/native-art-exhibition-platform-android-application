@@ -17,7 +17,8 @@ import com.example.naepapp.ui.components.NaepButton
 import com.example.naepapp.ui.components.NaepButtonKind
 import com.example.naepapp.ui.components.NaepTextField
 import com.example.naepapp.ui.components.NaepTopBar
-import com.example.naepapp.ui.theme.BrightSnow
+import com.example.naepapp.ui.model.DemoConfig
+import com.example.naepapp.ui.model.SampleData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ fun RegisterScreen(onRegistered: (name: String, email: String, phone: String) ->
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.register), onBack) }) { pad ->
         Column(Modifier.padding(pad).padding(24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AvatarImage(fullName.ifBlank { "?" }, size = 72.dp)
+                AvatarImage(fullName.ifBlank { SampleData.registrationDefaults.name }, size = 72.dp)
                 NaepButton(
                     text = stringResource(R.string.profile_picture_optional),
                     onClick = { hasPicture = !hasPicture })
@@ -44,10 +45,22 @@ fun RegisterScreen(onRegistered: (name: String, email: String, phone: String) ->
             NaepTextField(phone, { phone = it }, stringResource(R.string.phone_number), keyboardType = KeyboardType.Phone)
             NaepTextField(email, { email = it }, stringResource(R.string.email_address), keyboardType = KeyboardType.Email)
             NaepTextField(password, { password = it }, stringResource(R.string.password), isPassword = true,
-                error = if (password.isNotEmpty() && password.length < 8) "At least 8 characters" else null)
+                error = if (!DemoConfig.SKIP_AUTH_VALIDATION && password.isNotEmpty() && password.length < 8) "At least 8 characters" else null)
             NaepButton(stringResource(R.string.register),
-                { scope.launch { loading = true; delay(600); loading = false; onRegistered(fullName, email, phone) } },
-                Modifier.fillMaxWidth(), NaepButtonKind.Confirm, loading, valid)
+                {
+                    scope.launch {
+                        loading = true
+                        delay(600)
+                        loading = false
+                        onRegistered(
+                            fullName.ifBlank { SampleData.registrationDefaults.name },
+                            email.ifBlank { SampleData.registrationDefaults.email },
+                            phone.ifBlank { SampleData.registrationDefaults.phone }
+                        )
+                    }
+                },
+                Modifier.fillMaxWidth(), NaepButtonKind.Confirm, loading,
+                enabled = DemoConfig.SKIP_AUTH_VALIDATION || valid)
         }
     }
 }
