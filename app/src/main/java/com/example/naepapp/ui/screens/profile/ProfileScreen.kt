@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.naepapp.R
 import com.example.naepapp.ui.model.UserUi
 import com.example.naepapp.ui.components.AvatarImage
@@ -21,8 +23,32 @@ import com.example.naepapp.ui.theme.BlackForest
 
 @Composable
 fun ProfileScreen(
-    user: UserUi?, onSignIn: () -> Unit, onRegister: () -> Unit,
-    onOpenGallery: () -> Unit, onMyGallery: () -> Unit, onSignOut: () -> Unit,
+    onSignIn: () -> Unit,
+    onRegister: () -> Unit,
+    onOpenGallery: () -> Unit,
+    onMyGallery: () -> Unit,
+    onSignOut: () -> Unit,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val user by viewModel.user.collectAsStateWithLifecycle()
+    ProfileContent(
+        user = user,
+        onSignIn = onSignIn,
+        onRegister = onRegister,
+        onOpenGallery = onOpenGallery,
+        onMyGallery = onMyGallery,
+        onSignOut = { viewModel.signOut(onDone = onSignOut) }
+    )
+}
+
+@Composable
+fun ProfileContent(
+    user: UserUi?,
+    onSignIn: () -> Unit,
+    onRegister: () -> Unit,
+    onOpenGallery: () -> Unit,
+    onMyGallery: () -> Unit,
+    onSignOut: () -> Unit
 ) {
     var confirmSignOut by remember { mutableStateOf(false) }
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.profile)) }) { pad ->

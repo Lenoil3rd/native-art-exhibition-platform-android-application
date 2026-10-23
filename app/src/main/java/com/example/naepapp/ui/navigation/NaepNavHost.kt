@@ -25,7 +25,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.toRoute
 import androidx.navigation.compose.*
 import com.example.naepapp.R
-import com.example.naepapp.ui.model.SampleData
 import com.example.naepapp.ui.screens.auth.LoginScreen
 import com.example.naepapp.ui.screens.auth.RegisterScreen
 import com.example.naepapp.ui.screens.auth.RoleSelectionScreen
@@ -113,7 +112,6 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable<ProfileRoute> {
                     ProfileScreen(
-                        user = user,
                         onSignIn = { nav.navigate(LoginRoute()) }, onRegister = { nav.navigate(RegisterRoute()) },
                         onOpenGallery = { nav.navigate(OpenGalleryRoute) }, onMyGallery = { nav.navigate(MyGalleryRoute) },
                         onSignOut = { mainViewModel.logout(); nav.navigate(MarketplaceRoute) { popUpTo(0) } })
@@ -130,9 +128,8 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                         onAdd = { nav.navigate(CreationEditorRoute()) }, onEdit = { nav.navigate(CreationEditorRoute(it)) },
                         onOpenCreation = { nav.navigate(CreationDetailRoute(it)) })
                 }
-                composable<CreationEditorRoute> { entry ->
+                composable<CreationEditorRoute> {
                     CreationEditorScreen(
-                        existing = entry.toRoute<CreationEditorRoute>().id?.let { SampleData.creation(it) },
                         onBack = { nav.popBackStack() })
                 }
             }

@@ -19,7 +19,6 @@ import com.example.naepapp.ui.components.NaepButton
 import com.example.naepapp.ui.components.NaepButtonKind
 import com.example.naepapp.ui.components.NaepTextField
 import com.example.naepapp.ui.components.NaepTopBar
-import com.example.naepapp.ui.model.SampleData
 
 @Composable
 fun RegisterScreen(
@@ -70,7 +69,7 @@ fun RegisterContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AvatarImage(fullName.ifBlank { SampleData.registrationDefaults.name }, size = 72.dp)
+                AvatarImage(fullName.ifBlank { "User" }, size = 72.dp)
                 NaepButton(
                     text = stringResource(R.string.profile_picture_optional),
                     onClick = onTogglePicture
