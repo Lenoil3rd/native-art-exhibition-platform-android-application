@@ -13,9 +13,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.naepapp.R
+import com.example.naepapp.core.common.PriceFormatter
 import com.example.naepapp.ui.theme.*
-import java.text.NumberFormat
-import java.util.Locale
 
 // COMPONENT: AvailabilityBadge — "Readily Available" / "Unavailable"
 @Composable
@@ -50,9 +49,9 @@ fun AvailabilityToggle(available: Boolean, onToggle: () -> Unit, modifier: Modif
 @Composable
 fun PriceText(price: Double?, currency: String, modifier: Modifier = Modifier,
               style: TextStyle = MaterialTheme.typography.titleMedium) {
+    val priceOnRequest = stringResource(R.string.price_on_request)
     Text(
-        text = if (price == null) stringResource(R.string.price_on_request)
-        else "$currency ${NumberFormat.getNumberInstance(Locale.US).format(price)}",
+        text = PriceFormatter.format(price, currency, priceOnRequest),
         style = style, fontWeight = FontWeight.SemiBold, modifier = modifier)
 }
 

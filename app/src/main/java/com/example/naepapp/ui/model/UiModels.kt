@@ -1,5 +1,9 @@
 package com.example.naepapp.ui.model
 
+object DemoConfig {
+    const val SKIP_AUTH_VALIDATION = false
+}
+
 enum class FeedSort { Likes, Views }
 
 data class CategoryUi(
