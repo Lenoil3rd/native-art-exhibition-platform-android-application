@@ -1,5 +1,7 @@
 package com.example.naepapp.ui.model
 
+import com.example.naepapp.core.network.dto.UserDto
+
 object DemoConfig {
     const val SKIP_AUTH_VALIDATION = false
 }
@@ -52,4 +54,16 @@ data class UserUi(
     val onboardingDone: Boolean = true,
 ) {
     val isArtisan get() = artisanId != null
+}
+
+fun UserDto?.toUi(): UserUi? {
+    if (this == null) return null
+    return UserUi(
+        name = fullName,
+        email = email,
+        phone = phoneNumber,
+        role = if (isArtisan) "Artisan" else "Enthusiast",
+        artisanId = if (isArtisan) id else null,
+        onboardingDone = onboardingCompleted
+    )
 }

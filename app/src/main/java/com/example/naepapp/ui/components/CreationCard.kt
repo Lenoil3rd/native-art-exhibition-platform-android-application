@@ -27,7 +27,7 @@ fun CreationCard(item: CreationUi, onClick: () -> Unit, modifier: Modifier = Mod
         colors = CardDefaults.cardColors(containerColor = BrightSnow), border = BorderStroke(1.dp, DustGrey),
     ) {
         Column {
-            ArtImage(Modifier.fillMaxWidth().aspectRatio(1f), item.title)
+            ArtImage(imageUrl = item.imageUrl, width = 600, modifier = Modifier.fillMaxWidth().aspectRatio(1f), contentDescription = item.title)
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(item.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(item.artisanName, style = MaterialTheme.typography.bodySmall,
