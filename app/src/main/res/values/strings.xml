@@ -48,6 +48,7 @@
         <string name="inventory_count">Inventory count</string>
         <string name="availability_status">Availability status</string>
         <string name="add_photos">Add photos</string>
+        <string name="whatsapp_not_installed">WhatsApp is not installed. Opening in your browser instead.</string>
 
         <!-- Artisan -->
         <string name="artisan_profile">Artisan Profile</string>

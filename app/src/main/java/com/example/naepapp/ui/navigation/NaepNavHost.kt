@@ -57,27 +57,24 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<MarketplaceRoute> {
                     MarketplaceScreen(onOpenCreation = { nav.navigate(CreationDetailRoute(it)) })
                 }
-                composable<CreationDetailRoute> { entry ->
+                composable<CreationDetailRoute> {
                     CreationDetailScreen(
-                        creation = SampleData.creation(entry.toRoute<CreationDetailRoute>().id), user = user,
                         onBack = { nav.popBackStack() },
                         onOpenArtisan = { nav.navigate(ArtisanProfileRoute(it)) },
                         onEdit = { nav.navigate(CreationEditorRoute(it)) },
                         onSignIn = { nav.navigate(LoginRoute(returnToPrevious = true)) })
                 }
-                composable<ArtisanProfileRoute> { entry ->
-                    val a = SampleData.artisan(entry.toRoute<ArtisanProfileRoute>().id)
+                composable<ArtisanProfileRoute> {
                     ArtisanProfileScreen(
-                        artisan = a, creations = SampleData.creationsOf(a.id).take(10), signedIn = user != null,
                         onBack = { nav.popBackStack() },
                         onOpenCreation = { nav.navigate(CreationDetailRoute(it)) },
                         onOpenGallery = { nav.navigate(GalleryRoute(it)) },
                         onSignIn = { nav.navigate(LoginRoute(returnToPrevious = true)) })
                 }
-                composable<GalleryRoute> { entry ->
+                composable<GalleryRoute> {
                     GalleryScreen(
-                        creations = SampleData.creationsOf(entry.toRoute<GalleryRoute>().id),
-                        onBack = { nav.popBackStack() }, onOpenCreation = { nav.navigate(CreationDetailRoute(it)) })
+                        onBack = { nav.popBackStack() },
+                        onOpenCreation = { nav.navigate(CreationDetailRoute(it)) })
                 }
                 composable<LoginRoute> { entry ->
                     val back = entry.toRoute<LoginRoute>().returnToPrevious
@@ -123,7 +120,7 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable<OpenGalleryRoute> {
                     OpenGalleryScreen(
-                        phone = user?.phone.orEmpty(), onBack = { nav.popBackStack() },
+                        onBack = { nav.popBackStack() },
                         onDone = {
                             nav.navigate(MyGalleryRoute) { popUpTo<OpenGalleryRoute> { inclusive = true } }
                         })
