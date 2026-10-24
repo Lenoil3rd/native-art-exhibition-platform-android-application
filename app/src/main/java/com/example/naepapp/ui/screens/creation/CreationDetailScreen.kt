@@ -186,7 +186,7 @@ fun FullScreenImageView(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.scrim)
+                .background(Onyx)
         ) {
             ArtImage(
                 imageUrl = imageUrl,
@@ -194,19 +194,20 @@ fun FullScreenImageView(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize()
             )
+            // High visibility variant with dark black background (Onyx) and bright icon
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.TopStart)
                     .padding(16.dp)
                     .statusBarsPadding()
                     .size(48.dp)
-                    .background(BrightSnow.copy(alpha = 0.9f), CircleShape)
+                    .background(Onyx.copy(alpha = 0.85f), CircleShape)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_arrow_back),
                     contentDescription = stringResource(R.string.cancel),
-                    tint = Onyx
+                    tint = BrightSnow
                 )
             }
         }

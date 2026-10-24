@@ -14,3 +14,4 @@ import kotlinx.serialization.Serializable
 @Serializable object OpenGalleryRoute
 @Serializable object MyGalleryRoute
 @Serializable data class CreationEditorRoute(val id: String? = null)
+@Serializable object EditProfileRoute

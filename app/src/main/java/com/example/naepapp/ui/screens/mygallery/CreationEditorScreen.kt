@@ -125,7 +125,7 @@ fun CreationEditorContent(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { pad ->
         Column(
-            Modifier.padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
+            Modifier.padding(pad).padding(16.dp).verticalScroll(rememberScrollState()).imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (existingMedia.isNotEmpty() || pickedUris.isNotEmpty()) {

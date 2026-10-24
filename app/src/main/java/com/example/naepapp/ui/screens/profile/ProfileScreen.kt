@@ -27,6 +27,7 @@ fun ProfileScreen(
     onRegister: () -> Unit,
     onOpenGallery: () -> Unit,
     onMyGallery: () -> Unit,
+    onEditProfile: () -> Unit,
     onSignOut: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -37,6 +38,7 @@ fun ProfileScreen(
         onRegister = onRegister,
         onOpenGallery = onOpenGallery,
         onMyGallery = onMyGallery,
+        onEditProfile = onEditProfile,
         onSignOut = { viewModel.signOut(onDone = onSignOut) }
     )
 }
@@ -48,6 +50,7 @@ fun ProfileContent(
     onRegister: () -> Unit,
     onOpenGallery: () -> Unit,
     onMyGallery: () -> Unit,
+    onEditProfile: () -> Unit,
     onSignOut: () -> Unit
 ) {
     var confirmSignOut by remember { mutableStateOf(false) }
@@ -65,8 +68,13 @@ fun ProfileContent(
                 Text(user.email, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(stringResource(if (user.isArtisan) R.string.role_artisan else R.string.role_enthusiast), color = BlackForest,
                     modifier = Modifier.background(BlackForest.copy(alpha = 0.12f), RoundedCornerShape(8.dp)).padding(10.dp, 4.dp))
-                if (user.isArtisan) NaepButton(stringResource(R.string.my_gallery), onMyGallery, Modifier.fillMaxWidth())
+                if (user.isArtisan) {
+                    NaepButton(stringResource(R.string.my_gallery), onMyGallery, Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(4.dp))
+                    NaepButton("Edit Profile", onEditProfile, Modifier.fillMaxWidth())
+                }
                 else NaepButton(stringResource(R.string.open_a_gallery), onOpenGallery, Modifier.fillMaxWidth(), NaepButtonKind.Confirm)
+                Spacer(Modifier.height(4.dp))
                 NaepButton(stringResource(R.string.sign_out), { confirmSignOut = true }, Modifier.fillMaxWidth(),
                     NaepButtonKind.Destructive, icon = painterResource(R.drawable.ic_logout))
             }

@@ -49,7 +49,7 @@ fun LoginContent(
     onGuest: () -> Unit
 ) {
     Column(
-        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp).verticalScroll(rememberScrollState()),
+        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp).verticalScroll(rememberScrollState()).imePadding(),
         verticalArrangement = Arrangement.Center
     ) {
         Text(stringResource(R.string.app_full_name), style = MaterialTheme.typography.headlineMedium)

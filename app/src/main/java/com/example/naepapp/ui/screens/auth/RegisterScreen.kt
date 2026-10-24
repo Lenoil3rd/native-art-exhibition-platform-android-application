@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,14 +30,12 @@ fun RegisterScreen(
         phone = viewModel.phone,
         email = viewModel.email,
         password = viewModel.password,
-        hasPicture = viewModel.hasPicture,
         loading = viewModel.loading,
         errorMessage = viewModel.errorMessage,
         onFullNameChanged = viewModel::updateFullName,
         onPhoneChanged = viewModel::updatePhone,
         onEmailChanged = viewModel::updateEmail,
         onPasswordChanged = viewModel::updatePassword,
-        onTogglePicture = viewModel::togglePicture,
         onRegister = { viewModel.register(onSuccess = onRegistered) },
         onBack = onBack
     )
@@ -50,14 +47,12 @@ fun RegisterContent(
     phone: String,
     email: String,
     password: String,
-    hasPicture: Boolean,
     loading: Boolean,
     errorMessage: String?,
     onFullNameChanged: (String) -> Unit,
     onPhoneChanged: (String) -> Unit,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    onTogglePicture: () -> Unit,
     onRegister: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -65,15 +60,12 @@ fun RegisterContent(
 
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.register), onBack) }) { pad ->
         Column(
-            Modifier.padding(pad).padding(24.dp).verticalScroll(rememberScrollState()),
+            Modifier.padding(pad).padding(24.dp).verticalScroll(rememberScrollState()).imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AvatarImage(fullName.ifBlank { "User" }, size = 72.dp)
-                NaepButton(
-                    text = stringResource(R.string.profile_picture_optional),
-                    onClick = onTogglePicture
-                )
+                Text("Enter your account details below", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             NaepTextField(fullName, onFullNameChanged, stringResource(R.string.full_name))
             NaepTextField(phone, onPhoneChanged, stringResource(R.string.phone_number), keyboardType = KeyboardType.Phone)

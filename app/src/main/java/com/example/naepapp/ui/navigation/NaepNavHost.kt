@@ -36,6 +36,7 @@ import com.example.naepapp.ui.screens.artisan.GalleryScreen
 import com.example.naepapp.ui.screens.artisan.ArtisanProfileScreen
 import com.example.naepapp.ui.screens.artisan.OpenGalleryScreen
 import com.example.naepapp.ui.screens.profile.ProfileScreen
+import com.example.naepapp.ui.screens.profile.EditProfileScreen
 import com.example.naepapp.ui.theme.*
 
 // ui/navigation/NaepNavHost.kt  — NAVIGATION: the app shell. Starts on the Marketplace so Guests can browse at once.
@@ -78,15 +79,11 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<LoginRoute> { entry ->
                     val back = entry.toRoute<LoginRoute>().returnToPrevious
                     LoginScreen(
-                        onSignIn = { userDto ->
-                            if (userDto.onboardingCompleted) {
-                                if (back) {
-                                    nav.popBackStack()
-                                } else {
-                                    nav.navigate(MarketplaceRoute) { popUpTo(0) }
-                                }
+                        onSignIn = { _ ->
+                            if (back) {
+                                nav.popBackStack()
                             } else {
-                                nav.navigate(RoleSelectionRoute(back)) { popUpTo<LoginRoute> { inclusive = true } }
+                                nav.navigate(MarketplaceRoute) { popUpTo(0) }
                             }
                         },
                         onRegister = { nav.navigate(RegisterRoute(back)) },
@@ -114,7 +111,11 @@ fun NaepNavHost(mainViewModel: MainViewModel = hiltViewModel()) {
                     ProfileScreen(
                         onSignIn = { nav.navigate(LoginRoute()) }, onRegister = { nav.navigate(RegisterRoute()) },
                         onOpenGallery = { nav.navigate(OpenGalleryRoute) }, onMyGallery = { nav.navigate(MyGalleryRoute) },
+                        onEditProfile = { nav.navigate(EditProfileRoute) },
                         onSignOut = { mainViewModel.logout(); nav.navigate(MarketplaceRoute) { popUpTo(0) } })
+                }
+                composable<EditProfileRoute> {
+                    EditProfileScreen(onBack = { nav.popBackStack() })
                 }
                 composable<OpenGalleryRoute> {
                     OpenGalleryScreen(
