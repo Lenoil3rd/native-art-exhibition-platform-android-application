@@ -1,6 +1,7 @@
 package com.example.naepapp.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,6 +30,7 @@ fun ArtImage(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     width: Int = 600,
+    contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null
 ) {
     val optimizedUrl = CloudinaryUrl.optimized(imageUrl, width)
@@ -46,7 +48,7 @@ fun ArtImage(
             model = optimizedUrl,
             contentDescription = contentDescription,
             modifier = modifier.background(DustGrey),
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             placeholder = painterResource(R.drawable.ic_empty),
             error = painterResource(R.drawable.ic_error)
         )
@@ -72,13 +74,20 @@ fun AvatarImage(name: String, modifier: Modifier = Modifier, size: Dp = 40.dp) {
 fun ImageCarousel(
     pageCount: Int,
     modifier: Modifier = Modifier,
-    imageUrls: List<String> = emptyList()
+    imageUrls: List<String> = emptyList(),
+    onImageClick: ((String?) -> Unit)? = null
 ) {
     val pager = rememberPagerState { pageCount.coerceAtLeast(1) }
     Box(modifier = modifier) {
         HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
             val url = imageUrls.getOrNull(page)
-            ArtImage(imageUrl = url, width = 800, modifier = Modifier.fillMaxSize())
+            ArtImage(
+                imageUrl = url,
+                width = 1000,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (onImageClick != null) Modifier.clickable { onImageClick(url) } else Modifier)
+            )
         }
         if (pageCount > 1) Row(
             modifier = Modifier

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -31,6 +32,11 @@ fun MarketplaceScreen(
     val categoryId by viewModel.categoryId.collectAsState()
     val categories by viewModel.categories.collectAsState()
     val pagingItems = viewModel.feed.collectAsLazyPagingItems()
+
+    LifecycleResumeEffect(Unit) {
+        pagingItems.refresh()
+        onPauseOrDispose {}
+    }
 
     MarketplaceContent(
         sort = sort,
@@ -72,9 +78,9 @@ fun MarketplaceContent(
                     LoadingView()
                 }
                 refreshState is LoadState.Error -> {
-                    val e = (refreshState as LoadState.Error).error
+                    val e = refreshState.error
                     val message = (e as? ApiError)?.message ?: e.localizedMessage ?: "Failed to load feed"
-                    ErrorView(message = message, onRetry = { pagingItems.retry() })
+                    ErrorView(message = message, onRetry = { pagingItems.refresh() })
                 }
                 pagingItems.itemCount == 0 -> {
                     EmptyView()

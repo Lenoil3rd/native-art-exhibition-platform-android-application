@@ -49,6 +49,10 @@
         <string name="availability_status">Availability status</string>
         <string name="add_photos">Add photos</string>
         <string name="whatsapp_not_installed">WhatsApp is not installed. Opening in your browser instead.</string>
+        <string name="waking_up_server">Waking up the server, this can take a few seconds.</string>
+        <string name="error_timeout">The server is taking too long to respond. Please try again.</string>
+        <string name="error_network">Can\'t reach the server. Check your connection.</string>
+        <string name="error_unauthorized">Please sign in again.</string>
 
         <!-- Artisan -->
         <string name="artisan_profile">Artisan Profile</string>

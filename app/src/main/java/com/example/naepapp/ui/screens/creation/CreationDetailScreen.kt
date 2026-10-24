@@ -1,19 +1,24 @@
 package com.example.naepapp.ui.screens.creation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,6 +27,8 @@ import com.example.naepapp.core.common.WhatsAppLauncher
 import com.example.naepapp.data.session.PendingAction
 import com.example.naepapp.ui.components.*
 import com.example.naepapp.ui.model.CreationUi
+import com.example.naepapp.ui.theme.BrightSnow
+import com.example.naepapp.ui.theme.Onyx
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,6 +44,7 @@ fun CreationDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val notInstalledMsg = stringResource(R.string.whatsapp_not_installed)
+    var fullScreenUrl by remember { mutableStateOf<String?>(null) }
 
     LifecycleResumeEffect(Unit) {
         viewModel.onResumed()
@@ -64,6 +72,13 @@ fun CreationDetailScreen(
         )
     }
 
+    fullScreenUrl?.let { url ->
+        FullScreenImageView(
+            imageUrl = url,
+            onDismiss = { fullScreenUrl = null }
+        )
+    }
+
     state.creationUi?.let { creation ->
         CreationDetailContent(
             creation = creation,
@@ -86,7 +101,10 @@ fun CreationDetailScreen(
                     }
                 }
             },
-            onToggleAvailability = viewModel::onToggleAvailability
+            onToggleAvailability = viewModel::onToggleAvailability,
+            onImageClick = { url ->
+                if (!url.isNullOrBlank()) fullScreenUrl = url
+            }
         )
     } ?: run {
         if (state.loading) {
@@ -111,11 +129,17 @@ fun CreationDetailContent(
     onEdit: (String) -> Unit,
     onLike: () -> Unit,
     onInquire: () -> Unit,
-    onToggleAvailability: () -> Unit
+    onToggleAvailability: () -> Unit,
+    onImageClick: (String?) -> Unit
 ) {
     Scaffold(topBar = { NaepTopBar(creation.title, onBack) }, snackbarHost = { SnackbarHost(snackbarHostState) }) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
-            ImageCarousel(pageCount = mediaUrls.size.coerceAtLeast(1), imageUrls = mediaUrls, modifier = Modifier.fillMaxWidth().aspectRatio(1f))
+            ImageCarousel(
+                pageCount = mediaUrls.size.coerceAtLeast(1),
+                imageUrls = mediaUrls,
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                onImageClick = onImageClick
+            )
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(creation.title, style = MaterialTheme.typography.headlineSmall)
                 Row(Modifier.clickable { onOpenArtisan(creation.artisanId) }, verticalAlignment = Alignment.CenterVertically) {
@@ -145,6 +169,45 @@ fun CreationDetailContent(
                 } else {
                     NaepButton(stringResource(R.string.inquire_creation), onInquire, Modifier.fillMaxWidth(), NaepButtonKind.Confirm)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun FullScreenImageView(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim)
+        ) {
+            ArtImage(
+                imageUrl = imageUrl,
+                width = 1600,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize()
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+                    .statusBarsPadding()
+                    .size(48.dp)
+                    .background(BrightSnow.copy(alpha = 0.9f), CircleShape)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.cancel),
+                    tint = Onyx
+                )
             }
         }
     }

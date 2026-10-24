@@ -5,7 +5,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -16,19 +16,41 @@ import com.example.naepapp.R
 import com.example.naepapp.ui.theme.BlackForest
 import com.example.naepapp.ui.theme.DustGrey
 import com.example.naepapp.ui.theme.OxBlood
+import kotlinx.coroutines.delay
 
 // COMPONENT: LoadingView / ErrorView / EmptyView — full-area status screens
-@Composable fun LoadingView(modifier: Modifier = Modifier) =
-    Box(modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = BlackForest) }
+@Composable
+fun LoadingView(modifier: Modifier = Modifier) {
+    var showHint by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(4000)
+        showHint = true
+    }
+    Box(modifier.fillMaxSize(), Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            CircularProgressIndicator(color = BlackForest)
+            if (showHint) {
+                Text(
+                    text = stringResource(R.string.waking_up_server),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
 
-@Composable fun ErrorView(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) =
+@Composable
+fun ErrorView(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) =
     Column(modifier.fillMaxSize().padding(24.dp), Arrangement.Center, Alignment.CenterHorizontally) {
         Icon(painterResource(R.drawable.ic_error), null, Modifier.size(48.dp), tint = OxBlood)
         Spacer(Modifier.height(8.dp)); Text(message, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp)); NaepButton(stringResource(R.string.retry), onRetry)
     }
 
-@Composable fun EmptyView(modifier: Modifier = Modifier, message: String = stringResource(R.string.nothing_here_yet)) =
+@Composable
+fun EmptyView(modifier: Modifier = Modifier, message: String = stringResource(R.string.nothing_here_yet)) =
     Column(modifier.fillMaxSize().padding(24.dp), Arrangement.Center, Alignment.CenterHorizontally) {
         Icon(painterResource(R.drawable.ic_empty), null, Modifier.size(48.dp), tint = DustGrey)
         Spacer(Modifier.height(8.dp)); Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant)

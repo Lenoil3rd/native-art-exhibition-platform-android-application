@@ -4,13 +4,16 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -29,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.naepapp.R
 import com.example.naepapp.ui.components.*
 import com.example.naepapp.ui.model.CategoryUi
+import com.example.naepapp.ui.theme.BrightSnow
+import com.example.naepapp.ui.theme.OxBlood
 
 @Composable
 fun CreationEditorScreen(
@@ -63,6 +68,7 @@ fun CreationEditorScreen(
         inventory = viewModel.inventory,
         available = viewModel.available,
         categories = viewModel.categories,
+        existingMedia = viewModel.existingMedia,
         pickedUris = pickedUris,
         loading = viewModel.loading,
         saving = viewModel.saving,
@@ -75,7 +81,8 @@ fun CreationEditorScreen(
         onInventoryChanged = viewModel::updateInventory,
         onAvailableChanged = viewModel::updateAvailable,
         onAddPhotos = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-        onRemovePhoto = viewModel::removePickedUri,
+        onRemoveExistingPhoto = viewModel::removeExistingPhoto,
+        onRemovePickedUri = viewModel::removePickedUri,
         onSave = { viewModel.save(context, onSuccess = onBack) },
         onBack = onBack
     )
@@ -92,6 +99,7 @@ fun CreationEditorContent(
     inventory: String,
     available: Boolean,
     categories: List<CategoryUi>,
+    existingMedia: List<ExistingPhoto>,
     pickedUris: List<Uri>,
     loading: Boolean,
     saving: Boolean,
@@ -104,11 +112,13 @@ fun CreationEditorContent(
     onInventoryChanged: (String) -> Unit,
     onAvailableChanged: (Boolean) -> Unit,
     onAddPhotos: () -> Unit,
-    onRemovePhoto: (Uri) -> Unit,
+    onRemoveExistingPhoto: (ExistingPhoto) -> Unit,
+    onRemovePickedUri: (Uri) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
-    val valid = title.isNotBlank() && categoryId != null && (pickedUris.isNotEmpty() || isEditing)
+    val totalPhotos = existingMedia.size + pickedUris.size
+    val valid = title.isNotBlank() && categoryId != null && totalPhotos > 0
 
     Scaffold(
         topBar = { NaepTopBar(stringResource(if (!isEditing) R.string.add_creation else R.string.edit_creation), onBack) },
@@ -118,12 +128,19 @@ fun CreationEditorContent(
             Modifier.padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (pickedUris.isNotEmpty()) {
+            if (existingMedia.isNotEmpty() || pickedUris.isNotEmpty()) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(pickedUris, key = { it.toString() }) { uri ->
-                        Box {
-                            ArtImage(imageUrl = uri.toString(), width = 200, modifier = Modifier.size(88.dp).clip(RoundedCornerShape(12.dp)))
-                        }
+                    items(existingMedia, key = { "existing_${it.publicId}" }) { photo ->
+                        EditableImageTile(
+                            imageUrl = photo.url,
+                            onRemove = { onRemoveExistingPhoto(photo) }
+                        )
+                    }
+                    items(pickedUris, key = { "picked_${it}" }) { uri ->
+                        EditableImageTile(
+                            imageUrl = uri.toString(),
+                            onRemove = { onRemovePickedUri(uri) }
+                        )
                     }
                 }
             }
@@ -142,6 +159,35 @@ fun CreationEditorContent(
                 stringResource(R.string.save),
                 onSave,
                 Modifier.fillMaxWidth(), NaepButtonKind.Confirm, saving, valid
+            )
+        }
+    }
+}
+
+@Composable
+fun EditableImageTile(
+    imageUrl: String,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        ArtImage(
+            imageUrl = imageUrl,
+            width = 200,
+            modifier = Modifier.size(88.dp).clip(RoundedCornerShape(12.dp))
+        )
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(28.dp)
+                .background(BrightSnow.copy(alpha = 0.85f), CircleShape)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_delete),
+                contentDescription = stringResource(R.string.delete),
+                tint = OxBlood,
+                modifier = Modifier.size(16.dp)
             )
         }
     }
