@@ -48,7 +48,7 @@ fun CategoryDropdown(categories: List<CategoryUi>, selectedId: Int?, label: Stri
             value = categories.firstOrNull { it.id == selectedId }?.name.orEmpty(), onValueChange = {}, readOnly = true,
             label = { Text(label) }, isError = error != null, supportingText = error?.let { { Text(it) } },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth())
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth().bringIntoViewOnFocus())
         ExposedDropdownMenu(open, { open = false }) {
             categories.forEach { c -> DropdownMenuItem(text = { Text(c.name) }, onClick = { onSelect(c.id); open = false }) }
         }

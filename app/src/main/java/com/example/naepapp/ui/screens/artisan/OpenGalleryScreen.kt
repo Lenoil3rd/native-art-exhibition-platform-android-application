@@ -3,6 +3,7 @@ package com.example.naepapp.ui.screens.artisan
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +37,7 @@ fun OpenGalleryScreen(
         categoryId = viewModel.categoryId,
         whatsapp = viewModel.whatsapp,
         categories = viewModel.categories,
+        fieldErrors = viewModel.fieldErrors,
         loading = viewModel.loading,
         errorMessage = viewModel.errorMessage,
         onBioChanged = viewModel::updateBio,
@@ -53,6 +56,7 @@ fun OpenGalleryContent(
     categoryId: Int?,
     whatsapp: String,
     categories: List<CategoryUi>,
+    fieldErrors: Map<String, String>,
     loading: Boolean,
     errorMessage: String?,
     onBioChanged: (String) -> Unit,
@@ -63,11 +67,11 @@ fun OpenGalleryContent(
     onBack: () -> Unit
 ) {
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.open_a_gallery), onBack) }) { pad ->
-        Column(Modifier.padding(pad).padding(24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            NaepTextField(bio, onBioChanged, stringResource(R.string.bio), singleLine = false, minLines = 4)
-            NaepTextField(location, onLocationChanged, stringResource(R.string.location))
+        Column(Modifier.padding(pad).padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            NaepTextField(bio, onBioChanged, stringResource(R.string.bio), singleLine = false, minLines = 4, error = fieldErrors["bio"])
+            NaepTextField(location, onLocationChanged, stringResource(R.string.location), error = fieldErrors["location"])
             CategoryDropdown(categories, categoryId, stringResource(R.string.primary_art_category), onCategoryChanged)
-            NaepTextField(whatsapp, onWhatsappChanged, stringResource(R.string.whatsapp_number), keyboardType = KeyboardType.Phone)
+            NaepTextField(whatsapp, onWhatsappChanged, stringResource(R.string.whatsapp_number), keyboardType = KeyboardType.Phone, error = fieldErrors["whatsappNumber"], imeAction = ImeAction.Done, onImeAction = onSubmit)
 
             if (!errorMessage.isNullOrBlank()) {
                 Text(errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

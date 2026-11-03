@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,6 +71,7 @@ fun CreationEditorScreen(
         categories = viewModel.categories,
         existingMedia = viewModel.existingMedia,
         pickedUris = pickedUris,
+        fieldErrors = viewModel.fieldErrors,
         loading = viewModel.loading,
         saving = viewModel.saving,
         snackbarHostState = snackbarHostState,
@@ -101,6 +103,7 @@ fun CreationEditorContent(
     categories: List<CategoryUi>,
     existingMedia: List<ExistingPhoto>,
     pickedUris: List<Uri>,
+    fieldErrors: Map<String, String>,
     loading: Boolean,
     saving: Boolean,
     snackbarHostState: SnackbarHostState,
@@ -125,7 +128,7 @@ fun CreationEditorContent(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { pad ->
         Column(
-            Modifier.padding(pad).padding(16.dp).verticalScroll(rememberScrollState()).imePadding(),
+            Modifier.padding(pad).padding(16.dp).imePadding().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (existingMedia.isNotEmpty() || pickedUris.isNotEmpty()) {
@@ -145,12 +148,12 @@ fun CreationEditorContent(
                 }
             }
             NaepButton(stringResource(R.string.add_photos), onAddPhotos, icon = painterResource(R.drawable.ic_add_photo))
-            NaepTextField(title, onTitleChanged, stringResource(R.string.title))
-            NaepTextField(description, onDescriptionChanged, stringResource(R.string.description), singleLine = false, minLines = 4)
+            NaepTextField(title, onTitleChanged, stringResource(R.string.title), error = fieldErrors["title"])
+            NaepTextField(description, onDescriptionChanged, stringResource(R.string.description), singleLine = false, minLines = 4, error = fieldErrors["description"])
             CategoryDropdown(categories, categoryId, stringResource(R.string.category), onCategoryChanged)
-            NaepTextField(dimensions, onDimensionsChanged, stringResource(R.string.dimensions) + " (e.g. 60 cm x 90 cm)")
-            NaepTextField(price, onPriceChanged, stringResource(R.string.price_mwk), keyboardType = KeyboardType.Number, prefix = "MWK ")
-            NaepTextField(inventory, onInventoryChanged, stringResource(R.string.inventory_count), keyboardType = KeyboardType.Number)
+            NaepTextField(dimensions, onDimensionsChanged, stringResource(R.string.dimensions) + " (e.g. 60 cm x 90 cm)", error = fieldErrors["dimensions"])
+            NaepTextField(price, onPriceChanged, stringResource(R.string.price_mwk), keyboardType = KeyboardType.Number, prefix = "MWK ", error = fieldErrors["price"])
+            NaepTextField(inventory, onInventoryChanged, stringResource(R.string.inventory_count), keyboardType = KeyboardType.Number, error = fieldErrors["inventoryCount"], imeAction = ImeAction.Done, onImeAction = onSave)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.availability_status), Modifier.weight(1f))
                 AvailabilityToggle(available, onToggle = { onAvailableChanged(!available) }, modifier = Modifier.testTag("availability_switch"))

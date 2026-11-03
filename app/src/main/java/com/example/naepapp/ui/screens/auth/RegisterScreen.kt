@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,12 +31,14 @@ fun RegisterScreen(
         phone = viewModel.phone,
         email = viewModel.email,
         password = viewModel.password,
+        confirmPassword = viewModel.confirmPassword,
         loading = viewModel.loading,
         errorMessage = viewModel.errorMessage,
         onFullNameChanged = viewModel::updateFullName,
         onPhoneChanged = viewModel::updatePhone,
         onEmailChanged = viewModel::updateEmail,
         onPasswordChanged = viewModel::updatePassword,
+        onConfirmPasswordChanged = viewModel::updateConfirmPassword,
         onRegister = { viewModel.register(onSuccess = onRegistered) },
         onBack = onBack
     )
@@ -47,20 +50,22 @@ fun RegisterContent(
     phone: String,
     email: String,
     password: String,
+    confirmPassword: String,
     loading: Boolean,
     errorMessage: String?,
     onFullNameChanged: (String) -> Unit,
     onPhoneChanged: (String) -> Unit,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
+    onConfirmPasswordChanged: (String) -> Unit,
     onRegister: () -> Unit,
     onBack: () -> Unit
 ) {
-    val valid = fullName.length >= 2 && phone.length >= 9 && email.contains("@") && password.length >= 8
+    val valid = fullName.length >= 2 && phone.length >= 9 && email.contains("@") && password.length >= 8 && password == confirmPassword
 
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.register), onBack) }) { pad ->
         Column(
-            Modifier.padding(pad).padding(24.dp).verticalScroll(rememberScrollState()).imePadding(),
+            Modifier.padding(pad).padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -73,6 +78,12 @@ fun RegisterContent(
             NaepTextField(
                 password, onPasswordChanged, stringResource(R.string.password), isPassword = true,
                 error = if (password.isNotEmpty() && password.length < 8) "At least 8 characters" else null
+            )
+            NaepTextField(
+                confirmPassword, onConfirmPasswordChanged, "Confirm Password", isPassword = true,
+                error = if (confirmPassword.isNotEmpty() && confirmPassword != password) "Passwords do not match" else null,
+                imeAction = ImeAction.Done,
+                onImeAction = onRegister
             )
 
             if (!errorMessage.isNullOrBlank()) {

@@ -58,12 +58,13 @@ data class UserUi(
 
 fun UserDto?.toUi(): UserUi? {
     if (this == null) return null
+    val artisan = isArtisan || preferredMode?.equals("artisan", ignoreCase = true) == true
     return UserUi(
         name = fullName,
         email = email,
         phone = phoneNumber,
-        role = if (isArtisan) "Artisan" else "Enthusiast",
-        artisanId = if (isArtisan) id else null,
+        role = if (artisan) "Artisan" else "Enthusiast",
+        artisanId = if (artisan) id else null,
         onboardingDone = onboardingCompleted
     )
 }

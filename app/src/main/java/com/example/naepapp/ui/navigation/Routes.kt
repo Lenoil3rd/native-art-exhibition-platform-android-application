@@ -3,6 +3,7 @@ package com.example.naepapp.ui.navigation
 import kotlinx.serialization.Serializable
 
 // ui/navigation/Routes.kt  — NAVIGATION: every destination as a type-safe class
+@Serializable object SplashRoute
 @Serializable object MarketplaceRoute
 @Serializable data class CreationDetailRoute(val id: String)
 @Serializable data class ArtisanProfileRoute(val id: String)

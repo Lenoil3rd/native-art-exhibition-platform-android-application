@@ -44,6 +44,7 @@ fun CreationDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val notInstalledMsg = stringResource(R.string.whatsapp_not_installed)
+    val couldNotAttachMsg = stringResource(R.string.could_not_attach_photo)
     var fullScreenUrl by remember { mutableStateOf<String?>(null) }
 
     LifecycleResumeEffect(Unit) {
@@ -86,20 +87,44 @@ fun CreationDetailScreen(
             isLikedByMe = state.isLikedByMe,
             isOwnCreation = state.isOwnCreation,
             loading = state.loading,
+            inquiring = state.inquiring,
             togglingAvailability = state.togglingAvailability,
             snackbarHostState = snackbarHostState,
-            onBack = onBack,
+            onBack = back@{ onBack() },
             onOpenArtisan = onOpenArtisan,
             onEdit = onEdit,
             onLike = viewModel::onLike,
             onInquire = {
-                viewModel.onInquire { url ->
-                    WhatsAppLauncher.launch(context, url) {
+                viewModel.onInquire(
+                    onLaunchWhatsApp = { url ->
+                        WhatsAppLauncher.launch(context, url) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(notInstalledMsg)
+                            }
+                        }
+                    },
+                    onLaunchWhatsAppWithImage = { intent, fallbackUrl ->
+                        try {
+                            context.startActivity(intent)
+                        } catch (_: Exception) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(couldNotAttachMsg)
+                            }
+                            if (!fallbackUrl.isNullOrBlank()) {
+                                WhatsAppLauncher.launch(context, fallbackUrl) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(notInstalledMsg)
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onShowSnackbar = { msg ->
                         scope.launch {
-                            snackbarHostState.showSnackbar(notInstalledMsg)
+                            snackbarHostState.showSnackbar(msg)
                         }
                     }
-                }
+                )
             },
             onToggleAvailability = viewModel::onToggleAvailability,
             onImageClick = { url ->
@@ -122,6 +147,7 @@ fun CreationDetailContent(
     isLikedByMe: Boolean,
     isOwnCreation: Boolean,
     loading: Boolean,
+    inquiring: Boolean,
     togglingAvailability: Boolean,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
@@ -167,7 +193,7 @@ fun CreationDetailContent(
                     )
                     NaepButton(stringResource(R.string.edit_creation), { onEdit(creation.id) }, Modifier.fillMaxWidth())
                 } else {
-                    NaepButton(stringResource(R.string.inquire_creation), onInquire, Modifier.fillMaxWidth(), NaepButtonKind.Confirm)
+                    NaepButton(stringResource(R.string.inquire_creation), onInquire, Modifier.fillMaxWidth(), NaepButtonKind.Confirm, loading = inquiring)
                 }
             }
         }

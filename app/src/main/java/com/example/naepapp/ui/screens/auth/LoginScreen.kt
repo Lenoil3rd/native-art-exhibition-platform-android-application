@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.naepapp.R
@@ -49,14 +50,14 @@ fun LoginContent(
     onGuest: () -> Unit
 ) {
     Column(
-        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp).verticalScroll(rememberScrollState()).imePadding(),
+        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center
     ) {
         Text(stringResource(R.string.app_full_name), style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
         NaepTextField(identifier, onIdentifierChanged, stringResource(R.string.phone_or_email))
         Spacer(Modifier.height(12.dp))
-        NaepTextField(password, onPasswordChanged, stringResource(R.string.password), isPassword = true)
+        NaepTextField(password, onPasswordChanged, stringResource(R.string.password), isPassword = true, imeAction = ImeAction.Done, onImeAction = onSignIn)
 
         if (!errorMessage.isNullOrBlank()) {
             Spacer(Modifier.height(8.dp))
