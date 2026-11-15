@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.ApiError
 import com.example.naepapp.core.common.CloudinaryUploader
+import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.core.network.dto.CreationRequest
 import com.example.naepapp.core.network.dto.MediaInput
 import com.example.naepapp.data.repository.CreationRepository
@@ -114,12 +115,31 @@ class CreationEditorViewModel @Inject constructor(
         }
     }
 
-    fun updateTitle(v: String) { title = v; fieldErrors = fieldErrors - "title"; errorMessage = null }
+    fun updateTitle(v: String) {
+        title = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidFullName(v)) "Title must be at least 2 characters" else null
+        fieldErrors = if (err != null) fieldErrors + ("title" to err) else fieldErrors - "title"
+    }
+
     fun updateDescription(v: String) { description = v; fieldErrors = fieldErrors - "description"; errorMessage = null }
     fun updateCategoryId(v: Int?) { categoryId = v; fieldErrors = fieldErrors - "categoryId"; errorMessage = null }
     fun updateDimensions(v: String) { dimensions = v; fieldErrors = fieldErrors - "dimensions"; errorMessage = null }
-    fun updatePrice(v: String) { price = v; fieldErrors = fieldErrors - "price"; errorMessage = null }
-    fun updateInventory(v: String) { inventory = v; fieldErrors = fieldErrors - "inventoryCount"; errorMessage = null }
+
+    fun updatePrice(v: String) {
+        price = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidPrice(v)) "Enter a valid positive price" else null
+        fieldErrors = if (err != null) fieldErrors + ("price" to err) else fieldErrors - "price"
+    }
+
+    fun updateInventory(v: String) {
+        inventory = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidInventory(v)) "Enter a valid non-negative number" else null
+        fieldErrors = if (err != null) fieldErrors + ("inventoryCount" to err) else fieldErrors - "inventoryCount"
+    }
+
     fun updateAvailable(v: Boolean) { available = v }
 
     fun addPickedUris(uris: List<Uri>) {
@@ -140,11 +160,38 @@ class CreationEditorViewModel @Inject constructor(
     }
 
     fun save(context: Context, onSuccess: () -> Unit) {
-        val catId = categoryId ?: return
-        val uris = _pickedUris.value
+        val errors = mutableMapOf<String, String>()
+        if (title.isBlank()) {
+            errors["title"] = "Title is required"
+        } else if (!InputValidator.isValidFullName(title)) {
+            errors["title"] = "Title must be at least 2 characters"
+        }
 
+        if (price.isNotBlank() && !InputValidator.isValidPrice(price)) {
+            errors["price"] = "Enter a valid positive price"
+        }
+
+        if (inventory.isNotBlank() && !InputValidator.isValidInventory(inventory)) {
+            errors["inventoryCount"] = "Enter a valid non-negative number"
+        }
+
+        val catId = categoryId
+        if (catId == null) {
+            errorMessage = "Please select a category"
+            fieldErrors = errors
+            return
+        }
+
+        val uris = _pickedUris.value
         if (existingMedia.isEmpty() && uris.isEmpty()) {
             errorMessage = "At least one photo is required"
+            fieldErrors = errors
+            return
+        }
+
+        if (errors.isNotEmpty()) {
+            fieldErrors = errors
+            errorMessage = "Please fix the highlighted errors"
             return
         }
 

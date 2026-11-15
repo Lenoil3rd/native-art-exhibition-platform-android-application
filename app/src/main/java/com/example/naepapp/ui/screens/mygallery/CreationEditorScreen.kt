@@ -120,9 +120,6 @@ fun CreationEditorContent(
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
-    val totalPhotos = existingMedia.size + pickedUris.size
-    val valid = title.isNotBlank() && categoryId != null && totalPhotos > 0
-
     Scaffold(
         topBar = { NaepTopBar(stringResource(if (!isEditing) R.string.add_creation else R.string.edit_creation), onBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -161,7 +158,7 @@ fun CreationEditorContent(
             NaepButton(
                 stringResource(R.string.save),
                 onSave,
-                Modifier.fillMaxWidth(), NaepButtonKind.Confirm, saving, valid
+                Modifier.fillMaxWidth(), NaepButtonKind.Confirm, saving, enabled = !saving
             )
         }
     }

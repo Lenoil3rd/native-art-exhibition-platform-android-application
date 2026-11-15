@@ -77,10 +77,12 @@ fun OpenGalleryContent(
                 Text(errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
-            NaepButton(stringResource(R.string.open_a_gallery),
+            NaepButton(
+                stringResource(R.string.open_a_gallery),
                 onSubmit,
                 Modifier.fillMaxWidth(), NaepButtonKind.Confirm, loading,
-                enabled = bio.isNotBlank() && location.isNotBlank() && categoryId != null)
+                enabled = !loading
+            )
         }
     }
 }

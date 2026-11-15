@@ -61,6 +61,7 @@ fun EditProfileScreen(
         categories = viewModel.categories,
         profilePictureUri = viewModel.profilePictureUri,
         profilePictureUrl = viewModel.profilePictureUrl,
+        fieldErrors = viewModel.fieldErrors,
         saving = viewModel.saving,
         snackbarHostState = snackbarHostState,
         onChangePhoto = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
@@ -86,6 +87,7 @@ fun EditProfileContent(
     categories: List<CategoryUi>,
     profilePictureUri: Uri?,
     profilePictureUrl: String?,
+    fieldErrors: Map<String, String> = emptyMap(),
     saving: Boolean,
     snackbarHostState: SnackbarHostState,
     onChangePhoto: () -> Unit,
@@ -145,6 +147,7 @@ fun EditProfileContent(
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 NaepTextField(
                     fullName, onFullNameChanged, stringResource(R.string.full_name),
+                    error = fieldErrors["fullName"],
                     imeAction = if (isArtisan) ImeAction.Next else ImeAction.Done,
                     onImeAction = { if (!isArtisan) onSave() }
                 )
@@ -154,6 +157,7 @@ fun EditProfileContent(
                     CategoryDropdown(categories, categoryId, stringResource(R.string.primary_art_category), onCategoryChanged)
                     NaepTextField(
                         whatsapp, onWhatsappChanged, stringResource(R.string.whatsapp_number), keyboardType = KeyboardType.Phone,
+                        error = fieldErrors["whatsapp"],
                         imeAction = ImeAction.Done,
                         onImeAction = onSave
                     )

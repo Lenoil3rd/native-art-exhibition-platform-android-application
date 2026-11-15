@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -32,6 +33,11 @@ fun RegisterScreen(
         email = viewModel.email,
         password = viewModel.password,
         confirmPassword = viewModel.confirmPassword,
+        fullNameError = viewModel.fullNameError,
+        phoneError = viewModel.phoneError,
+        emailError = viewModel.emailError,
+        passwordError = viewModel.passwordError,
+        confirmPasswordError = viewModel.confirmPasswordError,
         loading = viewModel.loading,
         errorMessage = viewModel.errorMessage,
         onFullNameChanged = viewModel::updateFullName,
@@ -51,6 +57,11 @@ fun RegisterContent(
     email: String,
     password: String,
     confirmPassword: String,
+    fullNameError: String? = null,
+    phoneError: String? = null,
+    emailError: String? = null,
+    passwordError: String? = null,
+    confirmPasswordError: String? = null,
     loading: Boolean,
     errorMessage: String?,
     onFullNameChanged: (String) -> Unit,
@@ -61,27 +72,38 @@ fun RegisterContent(
     onRegister: () -> Unit,
     onBack: () -> Unit
 ) {
-    val valid = fullName.length >= 2 && phone.length >= 9 && email.contains("@") && password.length >= 8 && password == confirmPassword
-
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.register), onBack) }) { pad ->
         Column(
             Modifier.padding(pad).padding(24.dp).imePadding().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AvatarImage(fullName.ifBlank { "User" }, size = 72.dp)
                 Text("Enter your account details below", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            NaepTextField(fullName, onFullNameChanged, stringResource(R.string.full_name))
-            NaepTextField(phone, onPhoneChanged, stringResource(R.string.phone_number), keyboardType = KeyboardType.Phone)
-            NaepTextField(email, onEmailChanged, stringResource(R.string.email_address), keyboardType = KeyboardType.Email)
             NaepTextField(
-                password, onPasswordChanged, stringResource(R.string.password), isPassword = true,
-                error = if (password.isNotEmpty() && password.length < 8) "At least 8 characters" else null
+                fullName, onFullNameChanged, stringResource(R.string.full_name),
+                error = fullNameError
             )
             NaepTextField(
-                confirmPassword, onConfirmPasswordChanged, "Confirm Password", isPassword = true,
-                error = if (confirmPassword.isNotEmpty() && confirmPassword != password) "Passwords do not match" else null,
+                phone, onPhoneChanged, stringResource(R.string.phone_number),
+                keyboardType = KeyboardType.Phone,
+                error = phoneError
+            )
+            NaepTextField(
+                email, onEmailChanged, stringResource(R.string.email_address),
+                keyboardType = KeyboardType.Email,
+                error = emailError
+            )
+            NaepTextField(
+                password, onPasswordChanged, stringResource(R.string.password),
+                isPassword = true,
+                error = passwordError
+            )
+            NaepTextField(
+                confirmPassword, onConfirmPasswordChanged, "Confirm Password",
+                isPassword = true,
+                error = confirmPasswordError,
                 imeAction = ImeAction.Done,
                 onImeAction = onRegister
             )
@@ -96,7 +118,7 @@ fun RegisterContent(
                 modifier = Modifier.fillMaxWidth(),
                 kind = NaepButtonKind.Confirm,
                 loading = loading,
-                enabled = valid
+                enabled = !loading
             )
         }
     }

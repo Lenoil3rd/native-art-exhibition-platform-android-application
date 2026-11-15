@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.CloudinaryUploader
+import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.core.network.dto.ArtisanWriteProfileDto
 import com.example.naepapp.core.network.dto.UpdateMeRequest
 import com.example.naepapp.data.repository.ArtisanRepository
@@ -40,6 +41,9 @@ class EditProfileViewModel @Inject constructor(
     var profilePictureUri by mutableStateOf<Uri?>(null)
         private set
     var profilePictureUrl by mutableStateOf<String?>(null)
+        private set
+
+    var fieldErrors by mutableStateOf<Map<String, String>>(emptyMap())
         private set
     var saving by mutableStateOf(false)
         private set
@@ -81,14 +85,43 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateFullName(v: String) { fullName = v; errorMessage = null }
-    fun updateBio(v: String) { bio = v; errorMessage = null }
+    fun updateFullName(v: String) {
+        fullName = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidFullName(v)) "Full name must be at least 2 characters" else null
+        fieldErrors = if (err != null) fieldErrors + ("fullName" to err) else fieldErrors - "fullName"
+    }
+
+    fun updateBio(v: String) { fullName = v; errorMessage = null }
     fun updateLocation(v: String) { location = v; errorMessage = null }
-    fun updateWhatsapp(v: String) { whatsapp = v; errorMessage = null }
+
+    fun updateWhatsapp(v: String) {
+        whatsapp = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidPhone(v)) "Enter a valid phone number (at least 9 digits)" else null
+        fieldErrors = if (err != null) fieldErrors + ("whatsapp" to err) else fieldErrors - "whatsapp"
+    }
+
     fun updateCategoryId(v: Int?) { categoryId = v; errorMessage = null }
     fun updateProfilePictureUri(uri: Uri?) { profilePictureUri = uri; errorMessage = null }
 
     fun save(context: Context, onSuccess: () -> Unit) {
+        val errors = mutableMapOf<String, String>()
+        if (fullName.isBlank()) {
+            errors["fullName"] = "Full name is required"
+        } else if (!InputValidator.isValidFullName(fullName)) {
+            errors["fullName"] = "Full name must be at least 2 characters"
+        }
+        if (isArtisan && whatsapp.isNotBlank() && !InputValidator.isValidPhone(whatsapp)) {
+            errors["whatsapp"] = "Enter a valid phone number (at least 9 digits)"
+        }
+
+        if (errors.isNotEmpty()) {
+            fieldErrors = errors
+            errorMessage = "Please fix the highlighted errors"
+            return
+        }
+
         viewModelScope.launch {
             saving = true
             errorMessage = null

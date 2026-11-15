@@ -27,6 +27,8 @@ fun LoginScreen(
     LoginContent(
         identifier = viewModel.identifier,
         password = viewModel.password,
+        identifierError = viewModel.identifierError,
+        passwordError = viewModel.passwordError,
         loading = viewModel.loading,
         errorMessage = viewModel.errorMessage,
         onIdentifierChanged = viewModel::updateIdentifier,
@@ -41,6 +43,8 @@ fun LoginScreen(
 fun LoginContent(
     identifier: String,
     password: String,
+    identifierError: String? = null,
+    passwordError: String? = null,
     loading: Boolean,
     errorMessage: String?,
     onIdentifierChanged: (String) -> Unit,
@@ -55,9 +59,16 @@ fun LoginContent(
     ) {
         Text(stringResource(R.string.app_full_name), style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
-        NaepTextField(identifier, onIdentifierChanged, stringResource(R.string.phone_or_email))
+        NaepTextField(
+            identifier, onIdentifierChanged, stringResource(R.string.phone_or_email),
+            error = identifierError
+        )
         Spacer(Modifier.height(12.dp))
-        NaepTextField(password, onPasswordChanged, stringResource(R.string.password), isPassword = true, imeAction = ImeAction.Done, onImeAction = onSignIn)
+        NaepTextField(
+            password, onPasswordChanged, stringResource(R.string.password),
+            isPassword = true, error = passwordError,
+            imeAction = ImeAction.Done, onImeAction = onSignIn
+        )
 
         if (!errorMessage.isNullOrBlank()) {
             Spacer(Modifier.height(8.dp))
@@ -71,7 +82,7 @@ fun LoginContent(
             modifier = Modifier.fillMaxWidth(),
             kind = NaepButtonKind.Confirm,
             loading = loading,
-            enabled = identifier.isNotBlank() && password.isNotBlank()
+            enabled = !loading
         )
         Spacer(Modifier.height(8.dp))
         NaepButton(stringResource(R.string.register), onRegister, Modifier.fillMaxWidth())

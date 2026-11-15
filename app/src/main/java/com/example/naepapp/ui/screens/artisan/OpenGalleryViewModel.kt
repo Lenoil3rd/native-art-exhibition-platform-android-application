@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.ApiError
+import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.core.network.dto.OpenGalleryRequest
 import com.example.naepapp.data.repository.ArtisanRepository
 import com.example.naepapp.data.session.SessionManager
@@ -45,7 +46,13 @@ class OpenGalleryViewModel @Inject constructor(
     fun updateBio(v: String) { bio = v; fieldErrors = fieldErrors - "bio"; errorMessage = null }
     fun updateLocation(v: String) { location = v; fieldErrors = fieldErrors - "location"; errorMessage = null }
     fun updateCategoryId(v: Int?) { categoryId = v; fieldErrors = fieldErrors - "primaryCategoryId"; errorMessage = null }
-    fun updateWhatsapp(v: String) { whatsapp = v; fieldErrors = fieldErrors - "whatsappNumber"; errorMessage = null }
+
+    fun updateWhatsapp(v: String) {
+        whatsapp = v
+        errorMessage = null
+        val err = if (v.isNotEmpty() && !InputValidator.isValidPhone(v)) "Enter a valid phone number (at least 9 digits)" else null
+        fieldErrors = if (err != null) fieldErrors + ("whatsappNumber" to err) else fieldErrors - "whatsappNumber"
+    }
 
     private fun loadCategories() {
         viewModelScope.launch {
@@ -59,7 +66,30 @@ class OpenGalleryViewModel @Inject constructor(
     }
 
     fun openGallery(onSuccess: () -> Unit) {
-        val catId = categoryId ?: return
+        val errors = mutableMapOf<String, String>()
+        if (bio.isBlank()) {
+            errors["bio"] = "Bio is required"
+        }
+        if (location.isBlank()) {
+            errors["location"] = "Location is required"
+        }
+        if (whatsapp.isNotBlank() && !InputValidator.isValidPhone(whatsapp)) {
+            errors["whatsappNumber"] = "Enter a valid phone number (at least 9 digits)"
+        }
+
+        val catId = categoryId
+        if (catId == null) {
+            errorMessage = "Please select a category"
+            fieldErrors = errors
+            return
+        }
+
+        if (errors.isNotEmpty()) {
+            fieldErrors = errors
+            errorMessage = "Please fix the highlighted errors"
+            return
+        }
+
         viewModelScope.launch {
             loading = true
             errorMessage = null
