@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -30,6 +31,20 @@ fun AvailabilityBadge(available: Boolean, modifier: Modifier = Modifier) {
     )
 }
 
+@Composable
+fun SyncStatePill(syncState: String, modifier: Modifier = Modifier) {
+    if (syncState != "SYNCED") {
+        Text(
+            text = stringResource(R.string.waiting_to_sync),
+            color = Onyx,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = modifier
+                .background(DustGrey, RoundedCornerShape(6.dp))
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
 // COMPONENT: AvailabilityToggle — one-tap switch used by artisans (FR-8)
 @Composable
 fun AvailabilityToggle(available: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
@@ -38,6 +53,7 @@ fun AvailabilityToggle(available: Boolean, onToggle: () -> Unit, modifier: Modif
         Spacer(Modifier.width(8.dp))
         Switch(
             checked = available, onCheckedChange = { onToggle() }, enabled = enabled,
+            modifier = Modifier.testTag("availability_switch"),
             colors = SwitchDefaults.colors(
                 checkedTrackColor = BlackForest, checkedThumbColor = BrightSnow,
                 uncheckedTrackColor = DustGrey, uncheckedThumbColor = BrightSnow, uncheckedBorderColor = DustGrey),

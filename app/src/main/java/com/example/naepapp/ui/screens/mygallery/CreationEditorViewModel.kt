@@ -200,20 +200,9 @@ class CreationEditorViewModel @Inject constructor(
             errorMessage = null
             fieldErrors = emptyMap()
 
-            val newMediaInputs = mutableListOf<MediaInput>()
-            for (uri in uris) {
-                val uploadResult = cloudinaryUploader.upload(context, uri)
-                if (uploadResult.isFailure) {
-                    saving = false
-                    errorMessage = uploadResult.exceptionOrNull()?.message ?: "Image upload failed"
-                    return@launch
-                }
-                uploadResult.getOrNull()?.let { newMediaInputs.add(it) }
-            }
-
             val allMedia = existingMedia.map {
                 MediaInput(url = it.url, publicId = it.publicId, width = it.width, height = it.height)
-            } + newMediaInputs
+            }
 
             val priceVal = price.toDoubleOrNull()
             val invVal = inventory.toIntOrNull() ?: 1
@@ -231,9 +220,9 @@ class CreationEditorViewModel @Inject constructor(
             )
 
             val result = if (creationId != null) {
-                creationRepository.update(creationId, request)
+                creationRepository.update(creationId, request, uris)
             } else {
-                creationRepository.create(request)
+                creationRepository.create(request, uris)
             }
 
             saving = false

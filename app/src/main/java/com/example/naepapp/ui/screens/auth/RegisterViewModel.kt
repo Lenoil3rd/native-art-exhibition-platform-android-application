@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.ApiError
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
     var fullName by mutableStateOf("")
         private set
@@ -87,6 +89,11 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun register(onSuccess: () -> Unit) {
+        if (!connectivityMonitor.isOnline.value) {
+            errorMessage = "This needs an internet connection."
+            return
+        }
+
         val fnErr = when {
             fullName.isBlank() -> "Full name is required"
             !InputValidator.isValidFullName(fullName) -> "Full name must be at least 2 characters"

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.data.repository.MarketplaceRepository
 import com.example.naepapp.ui.model.CategoryUi
 import com.example.naepapp.ui.model.CreationUi
@@ -17,8 +18,11 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MarketplaceViewModel @Inject constructor(
-    private val repository: MarketplaceRepository
+    private val repository: MarketplaceRepository,
+    connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
+
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.isOnline
 
     private val _sort = MutableStateFlow(FeedSort.Likes)
     val sort: StateFlow<FeedSort> = _sort.asStateFlow()
@@ -26,8 +30,8 @@ class MarketplaceViewModel @Inject constructor(
     private val _categoryId = MutableStateFlow<Int?>(null)
     val categoryId: StateFlow<Int?> = _categoryId.asStateFlow()
 
-    private val _categories = MutableStateFlow<List<CategoryUi>>(emptyList())
-    val categories: StateFlow<List<CategoryUi>> = _categories.asStateFlow()
+    val categories: StateFlow<List<CategoryUi>> = repository.observeCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val feed: Flow<PagingData<CreationUi>> = combine(_sort, _categoryId) { s, c ->
         Pair(s, c)
@@ -40,7 +44,7 @@ class MarketplaceViewModel @Inject constructor(
     }.cachedIn(viewModelScope)
 
     init {
-        loadCategories()
+        refreshCategories()
     }
 
     fun setSort(sort: FeedSort) {
@@ -51,12 +55,9 @@ class MarketplaceViewModel @Inject constructor(
         _categoryId.value = categoryId
     }
 
-    private fun loadCategories() {
+    private fun refreshCategories() {
         viewModelScope.launch {
-            repository.categories().fold(
-                onSuccess = { _categories.value = it },
-                onFailure = { _categories.value = emptyList() }
-            )
+            repository.categories()
         }
     }
 }

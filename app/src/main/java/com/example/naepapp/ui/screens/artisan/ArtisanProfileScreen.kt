@@ -31,10 +31,12 @@ fun ArtisanProfileScreen(
     viewModel: ArtisanProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val notInstalledMsg = stringResource(R.string.whatsapp_not_installed)
+    val needsInternetMsg = stringResource(R.string.needs_internet_connection)
 
     state.error?.let { err ->
         LaunchedEffect(err) {
@@ -60,12 +62,17 @@ fun ArtisanProfileScreen(
                 artisan = state.artisan!!,
                 creations = state.creations,
                 signedIn = state.signedIn,
+                isOnline = isOnline,
                 snackbarHostState = snackbar,
                 onBack = onBack,
                 onOpenCreation = onOpenCreation,
                 onOpenGallery = onOpenGallery,
                 onSignIn = onSignIn,
                 onContactWhatsApp = { number ->
+                    if (!isOnline) {
+                        scope.launch { snackbar.showSnackbar(needsInternetMsg) }
+                        return@ArtisanProfileContent
+                    }
                     val digits = number.filter { it.isDigit() }
                     val waUrl = "https://wa.me/$digits"
                     WhatsAppLauncher.launch(context, waUrl) {
@@ -84,6 +91,7 @@ fun ArtisanProfileContent(
     artisan: ArtisanUi,
     creations: List<CreationUi>,
     signedIn: Boolean,
+    isOnline: Boolean = true,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onOpenCreation: (String) -> Unit,
@@ -97,6 +105,9 @@ fun ArtisanProfileContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (!isOnline) {
+                        OfflineBanner()
+                    }
                     AvatarImage(artisan.name, size = 96.dp)
                     Text(artisan.name, style = MaterialTheme.typography.headlineSmall)
                     Row(verticalAlignment = Alignment.CenterVertically) {

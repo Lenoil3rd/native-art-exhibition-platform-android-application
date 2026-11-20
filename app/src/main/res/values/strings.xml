@@ -78,4 +78,18 @@
         <string name="nothing_here_yet">Nothing here yet</string>
         <string name="something_went_wrong">Something went wrong</string>
 
+        <!-- Offline & Sync -->
+        <string name="offline_banner">You are offline. Showing saved data.</string>
+        <string name="not_available_offline_yet">Not available offline yet</string>
+        <string name="needs_internet_connection">This needs an internet connection.</string>
+        <string name="waiting_to_sync">Waiting to sync</string>
+        <string name="sync_status_all_saved">All changes saved</string>
+        <string name="sync_status_syncing">Syncing…</string>
+        <string name="sync_status_pending">%d changes waiting to sync</string>
+        <string name="sync_status_failed">%d changes could not sync</string>
+        <string name="discard_changes">Discard changes</string>
+        <string name="changes_saved_feedback">Your changes were saved.</string>
+        <string name="some_changes_failed_feedback">Some changes could not be saved.</string>
+        <string name="sign_out_pending_warning">You have %d changes that are not synced. Signing out will discard them.</string>
+
 </resources>

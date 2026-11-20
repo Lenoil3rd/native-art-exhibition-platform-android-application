@@ -2,6 +2,7 @@ package com.example.naepapp.ui.screens.mygallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.data.paging.toUi
 import com.example.naepapp.data.repository.CreationRepository
 import com.example.naepapp.ui.model.CreationUi
@@ -20,8 +21,11 @@ data class MyGalleryUiState(
 
 @HiltViewModel
 class MyGalleryViewModel @Inject constructor(
-    private val creationRepository: CreationRepository
+    private val creationRepository: CreationRepository,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
+
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.isOnline
 
     private val _uiState = MutableStateFlow(MyGalleryUiState())
     val uiState: StateFlow<MyGalleryUiState> = _uiState.asStateFlow()
@@ -47,6 +51,10 @@ class MyGalleryViewModel @Inject constructor(
     }
 
     fun toggleAvailability(id: String, currentAvailable: Boolean) {
+        if (!connectivityMonitor.isOnline.value) {
+            _uiState.update { it.copy(error = "This needs an internet connection.") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(togglingMap = state.togglingMap + (id to true))
@@ -75,6 +83,10 @@ class MyGalleryViewModel @Inject constructor(
     }
 
     fun deleteCreation(id: String) {
+        if (!connectivityMonitor.isOnline.value) {
+            _uiState.update { it.copy(error = "This needs an internet connection.") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(deletingId = null) }
             val result = creationRepository.delete(id)

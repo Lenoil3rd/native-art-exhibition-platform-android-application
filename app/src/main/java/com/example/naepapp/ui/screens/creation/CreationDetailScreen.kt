@@ -40,6 +40,7 @@ fun CreationDetailScreen(
     viewModel: CreationDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -89,6 +90,7 @@ fun CreationDetailScreen(
             loading = state.loading,
             inquiring = state.inquiring,
             togglingAvailability = state.togglingAvailability,
+            isOnline = isOnline,
             snackbarHostState = snackbarHostState,
             onBack = back@{ onBack() },
             onOpenArtisan = onOpenArtisan,
@@ -149,6 +151,7 @@ fun CreationDetailContent(
     loading: Boolean,
     inquiring: Boolean,
     togglingAvailability: Boolean,
+    isOnline: Boolean = true,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onOpenArtisan: (String) -> Unit,
@@ -160,6 +163,9 @@ fun CreationDetailContent(
 ) {
     Scaffold(topBar = { NaepTopBar(creation.title, onBack) }, snackbarHost = { SnackbarHost(snackbarHostState) }) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
+            if (!isOnline) {
+                OfflineBanner()
+            }
             ImageCarousel(
                 pageCount = mediaUrls.size.coerceAtLeast(1),
                 imageUrls = mediaUrls,
@@ -220,7 +226,6 @@ fun FullScreenImageView(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize()
             )
-            // High visibility variant with dark black background (Onyx) and bright icon
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier

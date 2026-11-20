@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.naepapp.R
 import com.example.naepapp.ui.components.CategoryDropdown
+import com.example.naepapp.ui.components.DistrictDropdown
 import com.example.naepapp.ui.components.NaepButton
 import com.example.naepapp.ui.components.NaepButtonKind
 import com.example.naepapp.ui.components.NaepTextField
@@ -69,7 +70,7 @@ fun OpenGalleryContent(
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.open_a_gallery), onBack) }) { pad ->
         Column(Modifier.padding(pad).padding(24.dp).imePadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             NaepTextField(bio, onBioChanged, stringResource(R.string.bio), singleLine = false, minLines = 4, error = fieldErrors["bio"])
-            NaepTextField(location, onLocationChanged, stringResource(R.string.location), error = fieldErrors["location"])
+            DistrictDropdown(selected = location.ifBlank { null }, onSelect = onLocationChanged, error = fieldErrors["location"])
             CategoryDropdown(categories, categoryId, stringResource(R.string.primary_art_category), onCategoryChanged)
             NaepTextField(whatsapp, onWhatsappChanged, stringResource(R.string.whatsapp_number), keyboardType = KeyboardType.Phone, error = fieldErrors["whatsappNumber"], imeAction = ImeAction.Done, onImeAction = onSubmit)
 

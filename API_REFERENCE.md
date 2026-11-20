@@ -300,3 +300,52 @@ The planned and actual methods for engagement match (`POST` view, `PUT` like, `D
 - **One live refresh token remains active:** the test refreshed the new account’s token and then sent the now-revoked original token to logout, which returned 204 but could not revoke the replacement token. This is a side effect of the requested refresh/logout capture sequence.
 - **Rate-limit burst:** the live capture exhausted the public limiter. It is in-memory and expires with its window or server restart; allow a minute before relying on a fresh public request quota.
 - **Android networking:** the API base is plain HTTP in development. Android release builds may block cleartext HTTP; configure a debug cleartext exception or use HTTPS outside local development.
+
+# API Reference
+
+## Creations
+
+### `POST /api/v1/creations`
+
+Requires an authenticated artisan. The request body is strict; unknown fields are rejected.
+
+```json
+{
+  "id": "optional UUID v4",
+  "title": "Artwork title",
+  "categoryId": 1,
+  "description": "Optional description",
+  "dimensions": "Optional dimensions",
+  "price": 12500,
+  "inventoryCount": 1,
+  "availabilityStatus": "available",
+  "status": "published",
+  "media": [
+    {
+      "url": "https://example.com/artwork.jpg",
+      "publicId": "artwork/image",
+      "width": 1200,
+      "height": 800
+    }
+  ]
+}
+```
+
+`id` is optional and, when supplied, must be a UUID v4. Without it, the database generates the ID.
+
+- **201 Created** — a new creation and its media were inserted atomically.
+- **200 OK** — this ID already belongs to the authenticated user and is not deleted. The existing `CreationDetail` is returned unchanged; the retry does not insert media again.
+- **409 Conflict**, code `ID_ALREADY_USED` — this ID belongs to another user or to a soft-deleted creation.
+
+The `CreationDetail` response includes `id`, `updatedAt`, the creation fields, and its ordered `media` array. All creation-detail and creation-summary responses include `updatedAt`.
+
+### `DELETE /api/v1/creations/:id`
+
+Requires the owner. Soft-deletes the creation and returns **204 No Content**. Repeating the request for the same owner's soft-deleted creation also returns **204**. Missing creations return 404; another user's non-deleted creation returns 403.
+
+### Repeatable creation actions
+
+- `PATCH /api/v1/creations/:id/availability` sets the requested availability state; repeating the same state is safe.
+- `POST /api/v1/creations/:id/view` records at most one view per user and creation.
+- `PUT /api/v1/creations/:id/like` does not add a duplicate like.
+- `DELETE /api/v1/creations/:id/like` is safe when the like is already absent.

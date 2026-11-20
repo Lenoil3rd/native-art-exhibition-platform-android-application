@@ -34,6 +34,7 @@ fun CreationCard(item: CreationUi, onClick: () -> Unit, modifier: Modifier = Mod
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 PriceText(item.price, item.currency, style = MaterialTheme.typography.bodyMedium)
                 AvailabilityBadge(item.available)
+                SyncStatePill(item.syncState)
                 StatsRow(item.likes, item.views)
             }
         }

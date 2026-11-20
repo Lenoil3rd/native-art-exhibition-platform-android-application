@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.CloudinaryUploader
 import com.example.naepapp.core.common.InputValidator
+import com.example.naepapp.core.common.MalawiDistricts
 import com.example.naepapp.core.network.dto.ArtisanWriteProfileDto
 import com.example.naepapp.core.network.dto.UpdateMeRequest
 import com.example.naepapp.data.repository.ArtisanRepository
@@ -75,7 +76,7 @@ class EditProfileViewModel @Inject constructor(
                 artisanRepository.profile(user!!.id).fold(
                     onSuccess = { profile ->
                         bio = profile.bio.orEmpty()
-                        location = profile.location.orEmpty()
+                        location = MalawiDistricts.matchOrNull(profile.location) ?: profile.location.orEmpty()
                         whatsapp = profile.whatsappNumber.orEmpty()
                         categoryId = profile.primaryCategoryId
                     },

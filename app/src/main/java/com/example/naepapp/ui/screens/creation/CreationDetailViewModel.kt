@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.core.common.WhatsAppSharer
 import com.example.naepapp.data.paging.toUi
 import com.example.naepapp.data.repository.CreationRepository
@@ -33,10 +34,13 @@ class CreationDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val creationRepository: CreationRepository,
     private val sessionManager: SessionManager,
-    private val whatsappSharer: WhatsAppSharer
+    private val whatsappSharer: WhatsAppSharer,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
 
     private val creationId: String = savedStateHandle["id"] ?: ""
+
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.isOnline
 
     private val _uiState = MutableStateFlow(CreationDetailUiState())
     val uiState: StateFlow<CreationDetailUiState> = _uiState.asStateFlow()
@@ -55,7 +59,7 @@ class CreationDetailViewModel @Inject constructor(
                     val ui = detail.toUi()
                     val urls = detail.media.sortedBy { it.position }.map { it.url }.ifEmpty { listOfNotNull(detail.coverImageUrl) }
                     val isSigned = sessionManager.user.value != null
-                    if (recordViewIfNeeded && isSigned && !detail.isOwnCreation) {
+                    if (recordViewIfNeeded && isSigned && !detail.isOwnCreation && connectivityMonitor.isOnline.value) {
                         creationRepository.recordView(creationId)
                     }
                     _uiState.update {
@@ -97,6 +101,11 @@ class CreationDetailViewModel @Inject constructor(
             return
         }
         if (current.isOwnCreation) return
+
+        if (!connectivityMonitor.isOnline.value) {
+            _uiState.update { it.copy(error = "This needs an internet connection.") }
+            return
+        }
 
         viewModelScope.launch {
             val wasLiked = current.isLikedByMe
@@ -151,6 +160,11 @@ class CreationDetailViewModel @Inject constructor(
         }
         if (current.isOwnCreation) return
 
+        if (!connectivityMonitor.isOnline.value) {
+            onShowSnackbar("This needs an internet connection.")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(inquiring = true) }
             val defaultMessage = "Hello, I am interested in your creation \"${current.creationUi?.title}\"."
@@ -191,6 +205,11 @@ class CreationDetailViewModel @Inject constructor(
         val current = _uiState.value
         val ui = current.creationUi ?: return
         if (!current.isOwnCreation) return
+
+        if (!connectivityMonitor.isOnline.value) {
+            _uiState.update { it.copy(error = "This needs an internet connection.") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(togglingAvailability = true) }

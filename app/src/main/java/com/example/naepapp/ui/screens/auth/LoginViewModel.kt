@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.core.network.dto.UserDto
 import com.example.naepapp.data.repository.AuthRepository
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
     var identifier by mutableStateOf("")
         private set
@@ -48,6 +50,11 @@ class LoginViewModel @Inject constructor(
     }
 
     fun login(onSuccess: (UserDto) -> Unit) {
+        if (!connectivityMonitor.isOnline.value) {
+            errorMessage = "This needs an internet connection."
+            return
+        }
+
         val idErr = when {
             identifier.isBlank() -> "Email or phone number is required"
             !InputValidator.isValidEmailOrPhone(identifier) -> "Enter a valid email address or phone number"

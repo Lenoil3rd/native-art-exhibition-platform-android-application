@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.naepapp.core.common.ApiError
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.core.common.InputValidator
 import com.example.naepapp.core.network.dto.OpenGalleryRequest
 import com.example.naepapp.data.repository.ArtisanRepository
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class OpenGalleryViewModel @Inject constructor(
     private val artisanRepository: ArtisanRepository,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
 
     var bio by mutableStateOf("")
@@ -66,6 +68,11 @@ class OpenGalleryViewModel @Inject constructor(
     }
 
     fun openGallery(onSuccess: () -> Unit) {
+        if (!connectivityMonitor.isOnline.value) {
+            errorMessage = "This needs an internet connection."
+            return
+        }
+
         val errors = mutableMapOf<String, String>()
         if (bio.isBlank()) {
             errors["bio"] = "Bio is required"

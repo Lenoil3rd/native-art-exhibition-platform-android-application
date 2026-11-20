@@ -19,8 +19,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.naepapp.R
-import com.example.naepapp.ui.model.CreationUi
 import com.example.naepapp.ui.components.*
+import com.example.naepapp.ui.model.CreationUi
 import com.example.naepapp.ui.theme.BlackForest
 import com.example.naepapp.ui.theme.BrightSnow
 import com.example.naepapp.ui.theme.DustGrey
@@ -34,6 +34,7 @@ fun MyGalleryScreen(
     viewModel: MyGalleryViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LifecycleResumeEffect(Unit) {
@@ -61,6 +62,7 @@ fun MyGalleryScreen(
                 creations = state.creations,
                 togglingMap = state.togglingMap,
                 deletingId = state.deletingId,
+                isOnline = isOnline,
                 snackbarHostState = snackbarHostState,
                 onAdd = onAdd,
                 onEdit = onEdit,
@@ -78,6 +80,7 @@ fun MyGalleryContent(
     creations: List<CreationUi>,
     togglingMap: Map<String, Boolean>,
     deletingId: String?,
+    isOnline: Boolean = true,
     snackbarHostState: SnackbarHostState,
     onAdd: () -> Unit,
     onEdit: (String) -> Unit,
@@ -94,28 +97,34 @@ fun MyGalleryContent(
                 icon = { Icon(painterResource(R.drawable.ic_add), null) }, text = { Text(stringResource(R.string.add_creation)) })
         },
     ) { pad ->
-        if (creations.isEmpty()) EmptyView(Modifier.padding(pad))
-        else LazyColumn(Modifier.padding(pad), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(creations, key = { it.id }) { c ->
-                val isToggling = togglingMap[c.id] == true
-                Card(Modifier.fillMaxWidth().clickable { onOpenCreation(c.id) },
-                    colors = CardDefaults.cardColors(containerColor = BrightSnow), border = BorderStroke(1.dp, DustGrey)) {
-                    Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ArtImage(imageUrl = c.imageUrl, width = 200, modifier = Modifier.size(88.dp).clip(RoundedCornerShape(12.dp)))
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(c.title, style = MaterialTheme.typography.titleSmall)
-                            PriceText(c.price, c.currency)
-                            AvailabilityToggle(
-                                available = c.available,
-                                onToggle = { onToggleAvailability(c.id, c.available) },
-                                enabled = !isToggling,
-                                modifier = Modifier.testTag("availability_switch")
-                            )
-                            StatsRow(c.likes, c.views)
-                        }
-                        Column {
-                            IconButton({ onEdit(c.id) }) { Icon(painterResource(R.drawable.ic_edit), stringResource(R.string.edit_creation)) }
-                            IconButton({ onSetDeletingId(c.id) }) { Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.delete), tint = OxBlood) }
+        Column(Modifier.padding(pad)) {
+            if (!isOnline) {
+                OfflineBanner()
+            }
+            if (creations.isEmpty()) EmptyView()
+            else LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(creations, key = { it.id }) { c ->
+                    val isToggling = togglingMap[c.id] == true
+                    Card(Modifier.fillMaxWidth().clickable { onOpenCreation(c.id) },
+                        colors = CardDefaults.cardColors(containerColor = BrightSnow), border = BorderStroke(1.dp, DustGrey)) {
+                        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            ArtImage(imageUrl = c.imageUrl, width = 200, modifier = Modifier.size(88.dp).clip(RoundedCornerShape(12.dp)))
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(c.title, style = MaterialTheme.typography.titleSmall)
+                                PriceText(c.price, c.currency)
+                                AvailabilityToggle(
+                                    available = c.available,
+                                    onToggle = { onToggleAvailability(c.id, c.available) },
+                                    enabled = !isToggling,
+                                    modifier = Modifier.testTag("availability_switch")
+                                )
+                                SyncStatePill(c.syncState)
+                                StatsRow(c.likes, c.views)
+                            }
+                            Column {
+                                IconButton({ onEdit(c.id) }) { Icon(painterResource(R.drawable.ic_edit), stringResource(R.string.edit_creation)) }
+                                IconButton({ onSetDeletingId(c.id) }) { Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.delete), tint = OxBlood) }
+                            }
                         }
                     }
                 }

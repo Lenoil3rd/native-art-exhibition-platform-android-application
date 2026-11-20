@@ -16,13 +16,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WhatsAppSharer @Inject constructor(
-    @ApplicationContext private val context: Context
+open class WhatsAppSharer @Inject constructor(
+    @ApplicationContext private val context: Context?
 ) {
-    suspend fun prepareImageShare(inquiry: InquiryDto, creationId: String): Result<Intent> {
+    open suspend fun prepareImageShare(inquiry: InquiryDto, creationId: String): Result<Intent> {
+        val ctx = context ?: return Result.failure(Exception("Context not available"))
         return withContext(Dispatchers.IO) {
             try {
-                val pm = context.packageManager
+                val pm = ctx.packageManager
                 val whatsappPackage = listOf("com.whatsapp", "com.whatsapp.w4b").firstOrNull { pkg ->
                     try {
                         pm.getPackageInfo(pkg, 0)
@@ -62,7 +63,7 @@ class WhatsAppSharer @Inject constructor(
                     return@withContext Result.failure(Exception("Image size exceeds 5MB limit"))
                 }
 
-                val sharedDir = File(context.cacheDir, "shared_images")
+                val sharedDir = File(ctx.cacheDir, "shared_images")
                 if (!sharedDir.exists()) {
                     sharedDir.mkdirs()
                 }
@@ -77,15 +78,13 @@ class WhatsAppSharer @Inject constructor(
                 imageFile.writeBytes(bytes)
 
                 val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
+                    ctx,
+                    "${ctx.packageName}.fileprovider",
                     imageFile
                 )
 
                 val fixedText = (inquiry.captionMessage ?: inquiry.message).replace("localhost:3000", "127.0.0.1:3000")
 
-                // The "jid" extra is an unofficial WhatsApp feature; if WhatsApp ignores it,
-                // WhatsApp shows its contact chooser with the photo and text already filled in, which is acceptable.
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "image/jpeg"
                     putExtra(Intent.EXTRA_STREAM, uri)
@@ -103,7 +102,7 @@ class WhatsAppSharer @Inject constructor(
         }
     }
 
-    suspend fun prepareImageShare(inquiry: InquiryDto): Result<Intent> {
+    open suspend fun prepareImageShare(inquiry: InquiryDto): Result<Intent> {
         return prepareImageShare(inquiry, inquiry.id ?: "item")
     }
 }

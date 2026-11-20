@@ -3,8 +3,10 @@ package com.example.naepapp.ui.screens.artisan
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.data.paging.toUi
 import com.example.naepapp.data.repository.ArtisanRepository
+import com.example.naepapp.data.session.SessionManager
 import com.example.naepapp.ui.model.ArtisanUi
 import com.example.naepapp.ui.model.CreationUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,10 +26,13 @@ data class ArtisanProfileUiState(
 class ArtisanProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val artisanRepository: ArtisanRepository,
-    sessionManager: com.example.naepapp.data.session.SessionManager
+    sessionManager: SessionManager,
+    connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
 
     private val artisanId: String = savedStateHandle["id"] ?: ""
+
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.isOnline
 
     private val _uiState = MutableStateFlow(ArtisanProfileUiState())
     val uiState: StateFlow<ArtisanProfileUiState> = _uiState.asStateFlow()

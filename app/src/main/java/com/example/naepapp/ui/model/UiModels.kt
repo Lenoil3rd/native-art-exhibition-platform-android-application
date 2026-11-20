@@ -43,6 +43,7 @@ data class CreationUi(
     val dimensions: String,
     val description: String,
     val photoCount: Int = 3,
+    val syncState: String = "SYNCED"
 )
 
 data class UserUi(

@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -28,13 +29,16 @@ fun MarketplaceScreen(
     onOpenCreation: (String) -> Unit,
     viewModel: MarketplaceViewModel = hiltViewModel()
 ) {
-    val sort by viewModel.sort.collectAsState()
-    val categoryId by viewModel.categoryId.collectAsState()
-    val categories by viewModel.categories.collectAsState()
+    val sort by viewModel.sort.collectAsStateWithLifecycle()
+    val categoryId by viewModel.categoryId.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val pagingItems = viewModel.feed.collectAsLazyPagingItems()
 
     LifecycleResumeEffect(Unit) {
-        pagingItems.refresh()
+        if (isOnline) {
+            pagingItems.refresh()
+        }
         onPauseOrDispose {}
     }
 
@@ -45,6 +49,7 @@ fun MarketplaceScreen(
         selectedCategoryId = categoryId,
         onCategorySelected = viewModel::setCategory,
         pagingItems = pagingItems,
+        isOnline = isOnline,
         onOpenCreation = onOpenCreation
     )
 }
@@ -57,12 +62,16 @@ fun MarketplaceContent(
     selectedCategoryId: Int?,
     onCategorySelected: (Int?) -> Unit,
     pagingItems: LazyPagingItems<CreationUi>,
+    isOnline: Boolean = true,
     onOpenCreation: (String) -> Unit
 ) {
     val refreshState = pagingItems.loadState.refresh
 
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.marketplace)) }) { pad ->
         Column(Modifier.padding(pad)) {
+            if (!isOnline) {
+                OfflineBanner()
+            }
             Spacer(Modifier.height(8.dp))
             MarketplaceFilterRow(
                 sort = sort,
@@ -74,16 +83,17 @@ fun MarketplaceContent(
             Spacer(Modifier.height(8.dp))
 
             when {
-                refreshState is LoadState.Loading -> {
+                refreshState is LoadState.Loading && pagingItems.itemCount == 0 -> {
                     LoadingView()
                 }
-                refreshState is LoadState.Error -> {
+                refreshState is LoadState.Error && pagingItems.itemCount == 0 -> {
                     val e = refreshState.error
                     val message = (e as? ApiError)?.message ?: e.localizedMessage ?: "Failed to load feed"
                     ErrorView(message = message, onRetry = { pagingItems.refresh() })
                 }
                 pagingItems.itemCount == 0 -> {
-                    EmptyView()
+                    val message = if (!isOnline) stringResource(R.string.not_available_offline_yet) else stringResource(R.string.nothing_here_yet)
+                    EmptyView(message = message)
                 }
                 else -> {
                     LazyVerticalGrid(

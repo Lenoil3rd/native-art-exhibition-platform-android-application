@@ -153,7 +153,7 @@ fun EditProfileContent(
                 )
                 if (isArtisan) {
                     NaepTextField(bio, onBioChanged, stringResource(R.string.bio), singleLine = false, minLines = 4)
-                    NaepTextField(location, onLocationChanged, stringResource(R.string.location))
+                    DistrictDropdown(selected = location.ifBlank { null }, onSelect = onLocationChanged)
                     CategoryDropdown(categories, categoryId, stringResource(R.string.primary_art_category), onCategoryChanged)
                     NaepTextField(
                         whatsapp, onWhatsappChanged, stringResource(R.string.whatsapp_number), keyboardType = KeyboardType.Phone,

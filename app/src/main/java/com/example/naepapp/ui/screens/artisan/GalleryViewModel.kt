@@ -3,6 +3,7 @@ package com.example.naepapp.ui.screens.artisan
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.data.paging.toUi
 import com.example.naepapp.data.repository.ArtisanRepository
 import com.example.naepapp.ui.model.CreationUi
@@ -20,10 +21,13 @@ data class GalleryUiState(
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val artisanRepository: ArtisanRepository
+    private val artisanRepository: ArtisanRepository,
+    connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
 
     private val artisanId: String = savedStateHandle["id"] ?: ""
+
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.isOnline
 
     private val _uiState = MutableStateFlow(GalleryUiState())
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()

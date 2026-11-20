@@ -109,6 +109,7 @@ data class MediaInput(
 
 @Serializable
 data class CreationRequest(
+    val id: String? = null,
     val title: String,
     val description: String? = null,
     val categoryId: Int,

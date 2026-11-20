@@ -24,6 +24,7 @@ fun GalleryScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
     when {
         state.loading -> {
@@ -41,6 +42,7 @@ fun GalleryScreen(
         else -> {
             GalleryContent(
                 creations = state.creations,
+                isOnline = isOnline,
                 onBack = onBack,
                 onOpenCreation = onOpenCreation
             )
@@ -49,16 +51,26 @@ fun GalleryScreen(
 }
 
 @Composable
-fun GalleryContent(creations: List<CreationUi>, onBack: () -> Unit, onOpenCreation: (String) -> Unit) {
+fun GalleryContent(
+    creations: List<CreationUi>,
+    isOnline: Boolean = true,
+    onBack: () -> Unit,
+    onOpenCreation: (String) -> Unit
+) {
     val grouped = remember(creations) { creations.groupBy { it.categoryName } }
     Scaffold(topBar = { NaepTopBar(stringResource(R.string.gallery), onBack) }) { pad ->
-        if (creations.isEmpty()) EmptyView(Modifier.padding(pad))
-        else LazyColumn(Modifier.padding(pad), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            grouped.forEach { (category, list) ->
-                item { SectionHeader(category) }
-                item {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(list, key = { it.id }) { c -> CreationCard(c, { onOpenCreation(c.id) }, Modifier.width(180.dp)) }
+        Column(Modifier.padding(pad)) {
+            if (!isOnline) {
+                OfflineBanner()
+            }
+            if (creations.isEmpty()) EmptyView()
+            else LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                grouped.forEach { (category, list) ->
+                    item { SectionHeader(category) }
+                    item {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(list, key = { it.id }) { c -> CreationCard(c, { onOpenCreation(c.id) }, Modifier.width(180.dp)) }
+                        }
                     }
                 }
             }
