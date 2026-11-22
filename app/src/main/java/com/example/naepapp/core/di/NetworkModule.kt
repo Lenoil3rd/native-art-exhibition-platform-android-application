@@ -9,6 +9,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -123,6 +126,13 @@ abstract class NetworkModule {
         @Singleton
         fun provideRefreshApi(@Named("RefreshRetrofit") retrofit: Retrofit): RefreshApi {
             return retrofit.create(RefreshApi::class.java)
+        }
+
+        @Provides
+        @Singleton
+        @Named("AppScope")
+        fun provideAppCoroutineScope(): CoroutineScope {
+            return CoroutineScope(SupervisorJob() + Dispatchers.IO)
         }
     }
 }

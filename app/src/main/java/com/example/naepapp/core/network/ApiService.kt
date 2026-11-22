@@ -28,6 +28,15 @@ interface ApiService {
     @PATCH("me")
     suspend fun updateMe(@Body request: UpdateMeRequest): Envelope<UserDto>
 
+    @PUT("me")
+    suspend fun updateMePut(@Body request: UpdateMeRequest): Envelope<UserDto>
+
+    @PATCH("users/me")
+    suspend fun updateMeUsersPatch(@Body request: UpdateMeRequest): Envelope<UserDto>
+
+    @PUT("users/me")
+    suspend fun updateMeUsersPut(@Body request: UpdateMeRequest): Envelope<UserDto>
+
     @POST("me/onboarding")
     suspend fun postOnboarding(@Body request: OnboardingRequest): Envelope<UserDto>
 

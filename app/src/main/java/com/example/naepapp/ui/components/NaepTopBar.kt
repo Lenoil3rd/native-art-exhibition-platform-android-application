@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,12 +64,7 @@ fun NaepDropdown(
     var open by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         expanded = open,
-        onExpandedChange = { newOpen ->
-            open = newOpen
-            if (newOpen) {
-                focusManager.clearFocus()
-            }
-        },
+        onExpandedChange = { open = it },
         modifier = modifier
     ) {
         OutlinedTextField(
@@ -82,7 +79,15 @@ fun NaepDropdown(
                 focusedBorderColor = BlackForest, unfocusedBorderColor = DustGrey, errorBorderColor = OxBlood,
                 focusedLabelColor = BlackForest, cursorColor = BlackForest
             ),
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth().bringIntoViewOnFocus()
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
+                .bringIntoViewOnFocus()
+                .onFocusEvent { state ->
+                    if (state.isFocused) {
+                        focusManager.clearFocus()
+                    }
+                }
         )
         ExposedDropdownMenu(
             expanded = open,

@@ -2,6 +2,7 @@ package com.example.naepapp.data.repository
 
 import com.example.naepapp.core.common.apiCall
 import com.example.naepapp.core.db.dao.ArtisanDao
+import com.example.naepapp.core.db.dao.CategoryDao
 import com.example.naepapp.core.db.dao.CreationDao
 import com.example.naepapp.core.db.entity.CreationEntity
 import com.example.naepapp.core.db.toDto
@@ -21,7 +22,8 @@ class ArtisanRepository @Inject constructor(
     private val apiService: ApiService,
     private val artisanDao: ArtisanDao,
     private val creationDao: CreationDao,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val categoryDao: CategoryDao? = null
 ) {
     fun observeProfile(id: String): Flow<ArtisanReadProfileDto?> {
         return artisanDao.observeById(id).map { entity ->
@@ -130,8 +132,28 @@ class ArtisanRepository @Inject constructor(
     }
 
     suspend fun categories(): Result<List<CategoryDto>> {
-        return apiCall {
-            apiService.getCategories().data
+        val res = apiCall {
+            val response = apiService.getCategories()
+            val entities = response.data.map { it.toEntity() }
+            categoryDao?.upsertAll(entities)
+            response.data
         }
+        return res.fold(
+            onSuccess = { Result.success(it) },
+            onFailure = {
+                val cached = categoryDao?.getAll() ?: emptyList()
+                if (cached.isNotEmpty()) {
+                    Result.success(cached.map { CategoryDto(id = it.id, name = it.name) })
+                } else {
+                    Result.success(listOf(
+                        CategoryDto(1, "Paintings"),
+                        CategoryDto(2, "Pottery and Ceramics"),
+                        CategoryDto(3, "Carvings (Wood works)"),
+                        CategoryDto(4, "Sculptures"),
+                        CategoryDto(5, "Drawings (Sketches and Realism)")
+                    ))
+                }
+            }
+        )
     }
 }

@@ -177,15 +177,17 @@ class CreationEditorViewModel @Inject constructor(
 
         val catId = categoryId
         if (catId == null) {
-            errorMessage = "Please select a category"
+            errors["categoryId"] = "Please select a category"
             fieldErrors = errors
+            errorMessage = "Please select a category"
             return
         }
 
         val uris = _pickedUris.value
         if (existingMedia.isEmpty() && uris.isEmpty()) {
-            errorMessage = "At least one photo is required"
+            errors["media"] = "At least one photo is required"
             fieldErrors = errors
+            errorMessage = "At least one photo is required"
             return
         }
 

@@ -27,7 +27,7 @@ interface CreationDao {
     @Query("SELECT * FROM creation_media WHERE creationId = :creationId ORDER BY position ASC")
     suspend fun getMediaForCreation(creationId: String): List<CreationMediaEntity>
 
-    @Query("SELECT * FROM creations WHERE artisanId = :artisanId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM creations WHERE artisanId = :artisanId AND syncState != 'PENDING_DELETE' ORDER BY createdAt DESC")
     fun observeMyCreations(artisanId: String): Flow<List<CreationEntity>>
 
     @Query("SELECT c.* FROM creations c INNER JOIN feed_entries f ON c.id = f.creationId WHERE f.queryKey = :queryKey ORDER BY f.position ASC")

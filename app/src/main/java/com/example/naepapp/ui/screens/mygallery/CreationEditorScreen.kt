@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -74,6 +75,7 @@ fun CreationEditorScreen(
         fieldErrors = viewModel.fieldErrors,
         loading = viewModel.loading,
         saving = viewModel.saving,
+        errorMessage = viewModel.errorMessage,
         snackbarHostState = snackbarHostState,
         onTitleChanged = viewModel::updateTitle,
         onDescriptionChanged = viewModel::updateDescription,
@@ -106,6 +108,7 @@ fun CreationEditorContent(
     fieldErrors: Map<String, String>,
     loading: Boolean,
     saving: Boolean,
+    errorMessage: String?,
     snackbarHostState: SnackbarHostState,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
@@ -147,7 +150,7 @@ fun CreationEditorContent(
             NaepButton(stringResource(R.string.add_photos), onAddPhotos, icon = painterResource(R.drawable.ic_add_photo))
             NaepTextField(title, onTitleChanged, stringResource(R.string.title), error = fieldErrors["title"])
             NaepTextField(description, onDescriptionChanged, stringResource(R.string.description), singleLine = false, minLines = 4, error = fieldErrors["description"])
-            CategoryDropdown(categories, categoryId, stringResource(R.string.category), onCategoryChanged)
+            CategoryDropdown(categories, categoryId, stringResource(R.string.category), onCategoryChanged, error = fieldErrors["categoryId"])
             NaepTextField(dimensions, onDimensionsChanged, stringResource(R.string.dimensions) + " (e.g. 60 cm x 90 cm)", error = fieldErrors["dimensions"])
             NaepTextField(price, onPriceChanged, stringResource(R.string.price_mwk), keyboardType = KeyboardType.Number, prefix = "MWK ", error = fieldErrors["price"])
             NaepTextField(inventory, onInventoryChanged, stringResource(R.string.inventory_count), keyboardType = KeyboardType.Number, error = fieldErrors["inventoryCount"], imeAction = ImeAction.Done, onImeAction = onSave)
@@ -155,6 +158,11 @@ fun CreationEditorContent(
                 Text(stringResource(R.string.availability_status), Modifier.weight(1f))
                 AvailabilityToggle(available, onToggle = { onAvailableChanged(!available) }, modifier = Modifier.testTag("availability_switch"))
             }
+
+            if (!errorMessage.isNullOrBlank()) {
+                Text(errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+
             NaepButton(
                 stringResource(R.string.save),
                 onSave,

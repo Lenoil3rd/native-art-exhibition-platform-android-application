@@ -1,6 +1,8 @@
 package com.example.naepapp.core.common
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import com.example.naepapp.core.network.ApiService
 import com.example.naepapp.core.network.dto.MediaInput
@@ -15,6 +17,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
+import java.io.ByteArrayOutputStream
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,7 +44,11 @@ data class CloudinaryErrorDetail(
 class CloudinaryUploader @Inject constructor(
     private val apiService: ApiService
 ) {
-    private val client = OkHttpClient.Builder().build()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
 
     suspend fun upload(context: Context, uri: Uri, purpose: String? = null): Result<MediaInput> = withContext(Dispatchers.IO) {
@@ -49,11 +57,36 @@ class CloudinaryUploader @Inject constructor(
             val sig = sigRes.data
 
             val contentResolver = context.contentResolver
-            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            val inputStream = contentResolver.openInputStream(uri)
                 ?: return@withContext Result.failure(Exception("Could not read image file"))
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
 
-            val mediaType = mimeType.toMediaTypeOrNull() ?: "image/jpeg".toMediaTypeOrNull()
+            val width = bitmap.width
+            val height = bitmap.height
+            val maxSide = 1200f
+            val scale = if (width > maxSide || height > maxSide) {
+                if (width > height) maxSide / width else maxSide / height
+            } else {
+                1f
+            }
+
+            val scaledBitmap = if (scale < 1f) {
+                Bitmap.createScaledBitmap(bitmap, (width * scale).toInt(), (height * scale).toInt(), true)
+            } else {
+                bitmap
+            }
+
+            val outputStream = ByteArrayOutputStream()
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+            val bytes = outputStream.toByteArray()
+
+            if (scaledBitmap != bitmap) {
+                scaledBitmap.recycle()
+            }
+            bitmap.recycle()
+
+            val mediaType = "image/jpeg".toMediaTypeOrNull() ?: return@withContext Result.failure(Exception("Invalid media type"))
             val requestBody = bytes.toRequestBody(mediaType)
             val multipartBodyBuilder = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)

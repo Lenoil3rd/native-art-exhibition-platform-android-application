@@ -15,6 +15,7 @@ import com.example.naepapp.core.network.dto.*
 import com.example.naepapp.core.storage.TokenStorage
 import com.example.naepapp.data.session.SessionManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import retrofit2.HttpException
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,7 +57,31 @@ class AuthRepository @Inject constructor(
 
     suspend fun updateMe(request: UpdateMeRequest): Result<UserDto> {
         return apiCall {
-            val response = apiService.updateMe(request)
+            val response = try {
+                apiService.updateMe(request)
+            } catch (e: HttpException) {
+                if (e.code() == 404) {
+                    try {
+                        apiService.updateMePut(request)
+                    } catch (e2: HttpException) {
+                        if (e2.code() == 404) {
+                            try {
+                                apiService.updateMeUsersPatch(request)
+                            } catch (e3: HttpException) {
+                                if (e3.code() == 404) {
+                                    apiService.updateMeUsersPut(request)
+                                } else {
+                                    throw e3
+                                }
+                            }
+                        } else {
+                            throw e2
+                        }
+                    }
+                } else {
+                    throw e
+                }
+            }
             val user = response.data
             userDao.upsert(user.toEntity())
             sessionManager.setUser(user)

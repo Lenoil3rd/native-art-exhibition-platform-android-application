@@ -2,9 +2,11 @@ package com.example.naepapp.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.example.naepapp.core.common.ConnectivityMonitor
 import com.example.naepapp.core.common.OutboxPlanner
 import com.example.naepapp.core.common.PhotoCompressor
 import com.example.naepapp.core.common.apiCall
+import com.example.naepapp.core.db.dao.CategoryDao
 import com.example.naepapp.core.db.dao.CreationDao
 import com.example.naepapp.core.db.dao.PendingOperationDao
 import com.example.naepapp.core.db.entity.CreationEntity
@@ -19,8 +21,10 @@ import com.example.naepapp.data.session.SessionManager
 import com.example.naepapp.data.sync.CreationPayload
 import com.example.naepapp.data.sync.LikePayload
 import com.example.naepapp.data.sync.AvailabilityPayload
+import com.example.naepapp.data.sync.SyncEngine
 import com.example.naepapp.data.sync.SyncScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -28,6 +32,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -37,7 +42,11 @@ class CreationRepository @Inject constructor(
     private val creationDao: CreationDao,
     private val pendingOperationDao: PendingOperationDao,
     private val sessionManager: SessionManager,
-    private val syncScheduler: SyncScheduler
+    private val syncScheduler: SyncScheduler,
+    private val syncEngine: SyncEngine? = null,
+    private val connectivityMonitor: ConnectivityMonitor? = null,
+    @Named("AppScope") private val appScope: CoroutineScope? = null,
+    private val categoryDao: CategoryDao? = null
 ) {
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
     private val outboxPlanner = OutboxPlanner()
@@ -106,13 +115,26 @@ class CreationRepository @Inject constructor(
     }
 
     suspend fun getMyCreations(): Result<List<CreationSummaryDto>> {
+        val currentUserId = sessionManager.user.value?.id.orEmpty()
+        val localPending = if (currentUserId.isNotBlank()) {
+            try {
+                creationDao.observeMyCreations(currentUserId).first().filter { it.syncState == "PENDING_CREATE" }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
         val result = apiCall {
             apiService.getMyCreations().data
         }
-        val currentUserId = sessionManager.user.value?.id.orEmpty()
         return result.fold(
             onSuccess = { dtos ->
                 val now = System.currentTimeMillis()
+                val serverIds = dtos.map { it.id }.toSet()
+                val pendingDtos = localPending.filter { it.id !in serverIds }.map { it.toSummaryDto() }
+
                 val entities = dtos.map { dto ->
                     val existing = creationDao.getById(dto.id)
                     CreationEntity(
@@ -141,7 +163,9 @@ class CreationRepository @Inject constructor(
                     )
                 }
                 creationDao.upsertAll(entities)
-                Result.success(dtos)
+                localPending.filter { it.id !in serverIds }.forEach { creationDao.upsert(it) }
+
+                Result.success(dtos + pendingDtos)
             },
             onFailure = { throwable ->
                 if (currentUserId.isNotBlank()) {
@@ -323,9 +347,29 @@ class CreationRepository @Inject constructor(
     }
 
     suspend fun categories(): Result<List<CategoryDto>> {
-        return apiCall {
-            apiService.getCategories().data
+        val res = apiCall {
+            val response = apiService.getCategories()
+            val entities = response.data.map { it.toEntity() }
+            categoryDao?.upsertAll(entities)
+            response.data
         }
+        return res.fold(
+            onSuccess = { Result.success(it) },
+            onFailure = {
+                val cached = categoryDao?.getAll() ?: emptyList()
+                if (cached.isNotEmpty()) {
+                    Result.success(cached.map { CategoryDto(id = it.id, name = it.name) })
+                } else {
+                    Result.success(listOf(
+                        CategoryDto(1, "Paintings"),
+                        CategoryDto(2, "Pottery and Ceramics"),
+                        CategoryDto(3, "Carvings (Wood works)"),
+                        CategoryDto(4, "Sculptures"),
+                        CategoryDto(5, "Drawings (Sketches and Realism)")
+                    ))
+                }
+            }
+        )
     }
 
     suspend fun create(request: CreationRequest, localUris: List<Uri> = emptyList()): Result<CreationDetailDto> {
